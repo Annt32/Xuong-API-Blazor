@@ -1,0 +1,21 @@
+﻿@page "/"
+@namespace BlazorServer.Pages
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+@{
+    Layout = "_Layout";
+}
+
+<!-- Thêm JavaScript confirmAction trước khi Blazor render component -->
+<script>
+    window.confirmAction = function (message) {
+        return confirm(message);
+    };
+
+    window.showToast = function (toastElement) {
+        var toast = new bootstrap.Toast(toastElement);
+        toast.show();
+    };
+</script>
+
+
+<component type="typeof(App)" render-mode="ServerPrerendered" />
