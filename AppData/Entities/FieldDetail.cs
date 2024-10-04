@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Text.Json.Serialization;
 
-namespace Appdata
+namespace AppData.Entities
 {
     public class FieldDetail //Sân Chi Tiết
     {

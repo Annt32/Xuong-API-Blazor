@@ -6,20 +6,20 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Appdata
+namespace AppData.Entities
 {
-    public class FieldShift
+    public class InvoiceDetail
     {
         [Key]
+        public Guid IdInvoiceDetail { get; set; }
+
+        [ForeignKey("Invoice")]
+        public Guid IdInvoice { get; set; }
+
+        [ForeignKey("FieldShift")]
         public Guid IdFieldShift { get; set; }
 
-        [ForeignKey("Shift")]
-        public Guid IdShift { get; set; }
-
-        [ForeignKey("FieldDetail")]
-        public Guid IdFieldDetail { get; set; }
-
-        public DateTime Time { get; set; }
+        public decimal Deposit { get; set; }
         public int Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
@@ -27,8 +27,9 @@ namespace Appdata
         public string? UpdatedBy { get; set; }
 
         // Navigation properties
-        public Shift Shift { get; set; }
-        public ICollection<FieldDetail> FieldDetails { get; set; }
+        public Invoice Invoice { get; set; }
+        public FieldShift FieldShift { get; set; }
+        public ServiceField ServiceField { get; set; }
     }
 
 }

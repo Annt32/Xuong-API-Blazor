@@ -5,17 +5,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Appdata
+namespace AppData.Entities
 {
-    public class Drink
+    public class Shift
     {
         [Key]
-        public Guid IdDrink { get; set; }
-
-        public string Image { get; set; }
-        public int Quantity { get; set; }
-        public decimal Price { get; set; }
-        public string DrinkName { get; set; }
+        public Guid IdShift { get; set; }
+        public string ShiftName { get; set; }
+        public TimeSpan StartTime { get; set; }
+        public TimeSpan EndTime { get; set; }
         public int Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
@@ -23,7 +21,7 @@ namespace Appdata
         public string? UpdatedBy { get; set; }
 
         // Navigation properties
-        public ICollection<DrinkDetail> DrinkDetails { get; set; }
+        public ICollection<Attendance> Attendances { get; set; }
     }
 
 }

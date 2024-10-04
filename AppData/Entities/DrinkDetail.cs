@@ -6,20 +6,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Appdata
+namespace AppData.Entities
 {
-    public class Parameter
+    public class DrinkDetail
     {
         [Key]
-        public Guid Id { get; set; }
+        public Guid IdDrinkDetail { get; set; }
 
-        [ForeignKey("ParameterType")]
-        public Guid ParameterTypeId { get; set; }
+        [ForeignKey("Drink")]
+        public Guid IdDrink { get; set; }
 
-        public string Code { get; set; }
-        public string Name { get; set; }
-        public string Value { get; set; }
-        public string Description { get; set; }
+        [ForeignKey("ServiceField")]
+        public Guid IdServiceField { get; set; }
+        public int Totalquantity { get; set; }
         public int Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
@@ -27,7 +26,8 @@ namespace Appdata
         public string? UpdatedBy { get; set; }
 
         // Navigation properties
-        public ParameterType ParameterType { get; set; }
+        public Drink Drink { get; set; }
+        public ServiceField ServiceField { get; set; }
     }
 
 }

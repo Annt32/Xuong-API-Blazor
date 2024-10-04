@@ -1,5 +1,6 @@
 using AppAPI.Repositories;
-using Appdata;
+using AppData.AppDbContext;
+using AppData.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace AppAPI

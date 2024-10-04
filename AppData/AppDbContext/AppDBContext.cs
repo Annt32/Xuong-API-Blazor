@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using AppData.Entities;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Appdata
+namespace AppData.AppDbContext
 {
     public class AppDBContext : DbContext
     {
@@ -33,14 +34,15 @@ namespace Appdata
         public DbSet<ParameterType> ParameterTypes { get; set; }
         public DbSet<FieldDetail> FieldDetails { get; set; }
         public DbSet<FieldShift> FieldShifts { get; set; }
+        public DbSet<FieldType> FieldTypes { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Data Source=DESKTOP-PMB8531\\SQLEXPRESS;Initial Catalog=XuongTH2;Integrated Security=True;Trust Server Certificate=True");
+            optionsBuilder.UseSqlServer("Data Source=MRG;Initial Catalog=XuongTH2;Integrated Security=True;Trust Server Certificate=True");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {         
+        {
             base.OnModelCreating(modelBuilder);
         }
     }

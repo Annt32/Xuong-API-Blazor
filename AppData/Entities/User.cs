@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Appdata
+namespace AppData.Entities
 {
     public class User
     {
@@ -23,7 +23,7 @@ namespace Appdata
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public string? CreatedBy { get; set; }
-        public string? UpdatedBy { get; set; }      
+        public string? UpdatedBy { get; set; }
         // Navigation properties
         public Role Role { get; set; }
         public ICollection<Attendance> Attendances { get; set; }

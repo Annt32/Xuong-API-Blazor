@@ -1,19 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Appdata
+namespace AppData.Entities
 {
-    public class Shift
+    public class Role
     {
         [Key]
-        public Guid IdShift { get; set; }
-        public string ShiftName { get; set; }
-        public TimeSpan StartTime { get; set; }
-        public TimeSpan EndTime { get; set; }
+        public Guid IdRole { get; set; }
+        [ForeignKey("User")]
+        public Guid UserId { get; set; }
+        public string RoleName { get; set; }
         public int Status { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
@@ -21,7 +22,7 @@ namespace Appdata
         public string? UpdatedBy { get; set; }
 
         // Navigation properties
-        public ICollection<Attendance> Attendances { get; set; }
+        public User Users { get; set; }
     }
 
 }

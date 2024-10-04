@@ -1,4 +1,4 @@
-﻿using Appdata;
+﻿using AppData.Entities;
 using Newtonsoft.Json; // Để sử dụng JsonConvert
 using System;
 using System.Collections.Generic;

@@ -6,28 +6,27 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Appdata
+namespace AppData.Entities
 {
-    public class DrinkDetail
+    public class Invoice
     {
         [Key]
-        public Guid IdDrinkDetail { get; set; }
+        public Guid IdInvoice { get; set; }
 
-        [ForeignKey("Drink")]
-        public Guid IdDrink { get; set; }
+        [ForeignKey("User")]
+        public Guid UserId { get; set; }
 
-        [ForeignKey("ServiceField")]
-        public Guid IdServiceField { get; set; }
-        public int Totalquantity { get; set; }
         public int Status { get; set; }
+        public decimal AdditionalFee { get; set; }
+        public string Notes { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public string? CreatedBy { get; set; }
         public string? UpdatedBy { get; set; }
 
         // Navigation properties
-        public Drink Drink { get; set; }
-        public ServiceField ServiceField { get; set; }
+        public User User { get; set; }
+        public ICollection<InvoiceDetail> InvoiceDetails { get; set; }
     }
 
 }
