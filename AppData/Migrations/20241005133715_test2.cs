@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace AppData.Migrations
 {
-    public partial class app : Migration
+    public partial class test2 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -30,22 +30,16 @@ namespace AppData.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Fields",
+                name: "FieldTypes",
                 columns: table => new
                 {
-                    IdField = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FieldName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Fields", x => x.IdField);
+                    table.PrimaryKey("PK_FieldTypes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -123,6 +117,31 @@ namespace AppData.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Users", x => x.UserId);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Fields",
+                columns: table => new
+                {
+                    IdField = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FieldName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FieldTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Fields", x => x.IdField);
+                    table.ForeignKey(
+                        name: "FK_Fields_FieldTypes_FieldTypeId",
+                        column: x => x.FieldTypeId,
+                        principalTable: "FieldTypes",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -441,6 +460,11 @@ namespace AppData.Migrations
                 column: "IdFieldShift");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Fields_FieldTypeId",
+                table: "Fields",
+                column: "FieldTypeId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_FieldShifts_IdShift",
                 table: "FieldShifts",
                 column: "IdShift");
@@ -522,6 +546,9 @@ namespace AppData.Migrations
 
             migrationBuilder.DropTable(
                 name: "ServiceFields");
+
+            migrationBuilder.DropTable(
+                name: "FieldTypes");
 
             migrationBuilder.DropTable(
                 name: "InvoiceDetails");

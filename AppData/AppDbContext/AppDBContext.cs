@@ -38,7 +38,7 @@ namespace AppData.AppDbContext
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Data Source=MRG;Initial Catalog=XuongTH2;Integrated Security=True;Trust Server Certificate=True");
+            optionsBuilder.UseSqlServer("Data Source=DO_HUY_HOANG;Initial Catalog=XuongTH2;Integrated Security=True;Trust Server Certificate=True");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
