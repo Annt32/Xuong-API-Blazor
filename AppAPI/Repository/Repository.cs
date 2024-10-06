@@ -18,9 +18,9 @@ namespace AppAPI.Repositories
             _entities = context.Set<T>(); // Gán DbSet cho đối tượng T
         }
 
-        public IEnumerable<T> GetAll()
+        public async Task<IEnumerable<T>> GetAll()
         {
-            return _entities.ToList();
+            return await _entities.ToListAsync();
         }
 
         // Trả về IQueryable để có thể linh hoạt truy vấn
