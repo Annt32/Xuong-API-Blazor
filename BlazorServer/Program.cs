@@ -17,7 +17,7 @@ namespace BlazorServer
 
             builder.Services.AddHttpClient();
 
-            //builder.Services.AddScoped<IFieldService, FieldService>();
+            builder.Services.AddScoped<IFieldService, FieldService>();
 
             var app = builder.Build();
 
