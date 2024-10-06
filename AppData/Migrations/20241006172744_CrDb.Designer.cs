@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppData.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20241004080517_CrTableFT")]
-    partial class CrTableFT
+    [Migration("20241006172744_CrDb")]
+    partial class CrDb
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

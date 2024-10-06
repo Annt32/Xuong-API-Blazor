@@ -7,7 +7,7 @@ namespace AppAPI.Repositories
 {
     public interface IRepository<T> where T : class
     {
-        IEnumerable<T> GetAll();
+        Task<IEnumerable<T>> GetAll();
         IQueryable<T> AsQueryable();  // Trả về IQueryable cho các truy vấn linh hoạt
         T GetById(Guid id);
         IEnumerable<T> Find(Expression<Func<T, bool>> predicate); // Tìm đối tượng theo điều kiện
