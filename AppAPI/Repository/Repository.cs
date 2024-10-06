@@ -12,15 +12,15 @@ namespace AppAPI.Repositories
         protected readonly AppDBContext _context;
         private readonly DbSet<T> _entities; // DbSet tương ứng với đối tượng T
 
-        public Repository(AppDBContext context) 
+        public Repository(AppDBContext context)
         {
             _context = context;
             _entities = context.Set<T>(); // Gán DbSet cho đối tượng T
         }
 
-        public async Task<IEnumerable<T>> GetAll()
+        public IEnumerable<T> GetAll()
         {
-            return await _entities.ToListAsync();
+            return _entities.ToList();
         }
 
         // Trả về IQueryable để có thể linh hoạt truy vấn
