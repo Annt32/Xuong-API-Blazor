@@ -9,6 +9,7 @@ namespace AppAPI.AutoMapperProfile
         public AutoMapperProfile()
         {
             CreateMap<FieldTypeDTO, FieldType>().ReverseMap();
+            CreateMap<FieldTypeCreateRequest, FieldType>();
             CreateMap<FieldTypeUpdateRequest, FieldType>();
             CreateMap<FieldTypeDelRequest, FieldType>();
         }

@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace AppData.DTO.FieldType_DTO
 {
-    public class FieldTypeDTO
+    public class FieldTypeCreateRequest
     {
-        public Guid Id { get; set; }
         public string Name { get; set; }
         public decimal Price { get; set; }
         public string Description { get; set; }

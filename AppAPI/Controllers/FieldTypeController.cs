@@ -27,7 +27,7 @@ namespace AppAPI.Controllers
         }
 
         [HttpPost("create")]
-        public async Task<IActionResult> Create([FromBody] FieldTypeDTO input)
+        public async Task<IActionResult> Create([FromBody] FieldTypeCreateRequest input)
         {
             try
             {
@@ -35,6 +35,9 @@ namespace AppAPI.Controllers
                 entity.Id = Guid.NewGuid();
                 entity.Name = input.Name;
                 entity.Price = input.Price;
+                entity.Description = input.Description;
+
+                entity.CreatedAt = DateTime.Now;
                 _repos.Add(entity);
 
                 return Ok("Thêm loại sân bóng thành công");
@@ -60,6 +63,9 @@ namespace AppAPI.Controllers
 
 				entity.Name = input.Name;
 				entity.Price = input.Price;
+                entity.Description = input.Description;
+
+                entity.UpdatedAt = DateTime.Now;
 				_repos.Update(entity);
 
 				return Ok("Sửa loại sân bóng thành công");

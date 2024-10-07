@@ -1,6 +1,9 @@
 ﻿@page "/fields"
+@using AppData.DTO.FieldType_DTO
 @using AppData.Entities
+@using BlazorServer.IServices
 @inject IFieldService FieldService
+@inject IFieldTypeServices _fieldtypesv
 @inject IJSRuntime JS
 
 <h3>Quản Lý Sân Bóng</h3>
@@ -8,8 +11,8 @@
 <div class="row">
     <!-- Thông Tin Sân Bóng -->
     <div class="col-md-4">
-        <div class="card">
-            <div class="card-header">
+        <div class="card p-3">
+            <div class="card-header border mb-2">
                 <strong>Thông Tin</strong>
             </div>
             <EditForm Model="@field" OnValidSubmit="HandleSubmit" OnInvalidSubmit="HandleInvalidSubmit">
@@ -22,22 +25,27 @@
                 }
 
                 <!-- Các trường thông tin sân bóng -->
-                <div class="form-group">
+                <div class="form-group mb-1">
                     <label for="fieldName">Tên Sân Bóng</label>
                     <input type="text" id="fieldName" @bind="field.FieldName" class="form-control" placeholder="Tên sân bóng" />
                     <ValidationMessage For="@(() => field.FieldName)" />
                 </div>
-                <div class="form-group">
+                <div class="form-group mb-1">
                     <label for="fieldType">Loại Sân Bóng</label>
-                    <input type="text" id="fieldType" @bind="field.Description" class="form-control" placeholder="Loại sân bóng" />
-                    <ValidationMessage For="@(() => field.Description)" />
+                    
+                    <InputSelect @bind-Value="SelectedFieldTypeId" class="form-control">
+                        <option value="@Guid.Empty">--Chọn loại sân--</option>
+                        @foreach (var item in _lstFT)
+                        {
+                            <option value="@item.Id">@item.Name</option>
+                        }
+                    </InputSelect>
                 </div>
-                <div class="form-group">
+                <div class="form-group mb-1">
                     <label for="price">Giá</label>
-                    <input type="number" id="price" @bind="field.Price" class="form-control" placeholder="Giá" />
-                    <ValidationMessage For="@(() => field.Price)" />
+                    <input type="number" id="price" value="@price"  class="form-control" readonly />
                 </div>
-                <div class="form-group">
+                <div class="form-group mb-1">
                     <label>Trạng Thái</label><br />
                     <input type="radio" id="active" @onclick="() => field.Status = 1" checked="@((field.Status == 1))" />
                     <label for="active">Bình thường</label>
@@ -48,7 +56,7 @@
 
                 <!-- Nút Tạo và Cập Nhật -->
                 <div class="form-group">
-                    @if (field.IdField == Guid.Empty)
+                    @if (field.Id == Guid.Empty)
                     {
                         <button type="submit" class="btn btn-primary">Tạo</button>
                     }
@@ -109,14 +117,14 @@
                                 <tr>
                                     <td>@(++index)</td>
                                     <td>@field.FieldName</td>
-                                    <td>@field.Description</td>
-                                    <td>@field.Price.ToString("C")</td>
+                                    <td>@field.FieldType.Name</td>
+                                    <td>@field.FieldType.Price.ToString("C")</td>
                                     <td>@(field.Status == 1 ? "Bình thường" : "Sửa chữa")</td>
                                     <td>
-                                        <button class="btn btn-info" @onclick="() => EditField(field.IdField)">
+                                        <button class="btn btn-info" @onclick="() => EditField(field.Id)">
                                             <i class="fas fa-edit"></i> Sửa
                                         </button>
-                                        <button class="btn btn-danger" @onclick="() => ConfirmDelete(field.IdField)">
+                                        <button class="btn btn-danger" @onclick="() => ConfirmDelete(field.Id)">
                                             <i class="fas fa-trash-alt"></i> Xóa
                                         </button>
                                     </td>
@@ -134,15 +142,20 @@
 @code {
     private List<Field> allFields = new List<Field>(); // Danh sách đầy đủ
     private List<Field> fields = new List<Field>(); // Danh sách hiển thị
+    private List<FieldTypeDTO> _lstFT = new List<FieldTypeDTO>();
     private Field field = new Field();
     private string searchText = string.Empty;
     private int index = 0;
     private ElementReference successToast;
+    private Guid selectedFieldTypeId;
+    private decimal price = 0;
+
 
     protected override async Task OnInitializedAsync()
     {
-        allFields = await FieldService.GetAllFieldsAsync();
+        //allFields = await FieldService.GetAllFieldsAsync();
         fields = new List<Field>(allFields);
+        await LoadFT();
     }
 
     private string errorMessage = string.Empty;
@@ -151,12 +164,13 @@
     {
         try
         {
+            field.FieldTypeId = selectedFieldTypeId;
             bool success = await FieldService.CreateFieldAsync(field);
 
             if (success)
             {
-                fields = await FieldService.GetAllFieldsAsync(); 
-                field = new Field(); 
+                //fields = await FieldService.GetAllFieldsAsync(); 
+                field = new Field();
                 errorMessage = "Đã tạo mới thành công!"; 
             }
             else
@@ -177,12 +191,13 @@
     {
         try
         {
-            bool success = await FieldService.UpdateFieldAsync(field.IdField, field);
+            bool success = await FieldService.UpdateFieldAsync(field.Id, field);
 
             if (success)
             {
                 fields = await FieldService.GetAllFieldsAsync(); 
                 field = new Field();
+                field.FieldTypeId = selectedFieldTypeId;
                 errorMessage = "Cập nhật thành công!"; 
             }
             else
@@ -205,29 +220,27 @@
     }
 
     private async Task HandleSubmit()
-{
-    if (field.IdField == Guid.Empty)
     {
-        await CreateField(); // Gọi tạo mới nếu IdField trống
+        if (field.Id == Guid.Empty)
+        {
+            await CreateField(); // Gọi tạo mới nếu IdField trống
+        }
+        else
+        {
+            await ConfirmUpdateField(); // Gọi xác nhận cập nhật nếu có IdField
+        }
     }
-    else
-    {
-        await ConfirmUpdateField(); // Gọi xác nhận cập nhật nếu có IdField
-    }
-}
 
 
     private void EditField(Guid id)
     {
-        var fieldToEdit = fields.FirstOrDefault(f => f.IdField == id);
+        var fieldToEdit = fields.FirstOrDefault(f => f.Id == id);
         if (fieldToEdit != null)
         {
             field = new Field
                 {
-                    IdField = fieldToEdit.IdField,
+                    Id = fieldToEdit.Id,
                     FieldName = fieldToEdit.FieldName,
-                    Price = fieldToEdit.Price,
-                    Description = fieldToEdit.Description,
                     Status = fieldToEdit.Status,
                     CreatedAt = fieldToEdit.CreatedAt,
                     UpdatedAt = fieldToEdit.UpdatedAt,
@@ -275,6 +288,31 @@
         if (confirmed)
         {
             await DeleteField(id);
+        }
+    }
+
+    //field type
+    private async Task LoadFT()
+    {
+        _lstFT = await _fieldtypesv.GetAllFieldType();
+    }
+
+    public Guid SelectedFieldTypeId
+    {
+        get => selectedFieldTypeId;
+        set
+        {
+            if (selectedFieldTypeId != value)
+            {
+                selectedFieldTypeId = value;
+
+                // Cập nhật giá trị price dựa trên loại sân bóng được chọn
+                var selectedField = _lstFT.FirstOrDefault(ft => ft.Id == selectedFieldTypeId);
+                if (selectedField != null)
+                {
+                    price = selectedField.Price;
+                }
+            }
         }
     }
 }

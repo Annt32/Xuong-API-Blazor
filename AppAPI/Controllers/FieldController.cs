@@ -42,7 +42,7 @@ namespace AppAPI.Controllers
         {
             try
             {
-                field.IdField = Guid.NewGuid();
+                field.Id = Guid.NewGuid();
                 field.CreatedAt = DateTime.UtcNow;
                 field.UpdatedAt = DateTime.UtcNow;
 
@@ -65,8 +65,6 @@ namespace AppAPI.Controllers
             }
 
             field.FieldName = fieldUpdate.FieldName;
-            field.Price = fieldUpdate.Price;
-            field.Description = fieldUpdate.Description;
             field.Status = fieldUpdate.Status;
             field.UpdatedAt = DateTime.UtcNow;
             field.UpdatedBy = fieldUpdate.UpdatedBy;

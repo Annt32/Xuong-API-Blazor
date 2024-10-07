@@ -1,4 +1,6 @@
 using BlazorServer.Data;
+using BlazorServer.IServices;
+using BlazorServer.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 
@@ -18,6 +20,9 @@ namespace BlazorServer
             builder.Services.AddHttpClient();
 
             builder.Services.AddScoped<IFieldService, FieldService>();
+            builder.Services.AddScoped<IFieldTypeServices, FieldTypeServices>();
+
+
 
             var app = builder.Build();
 
