@@ -1,4 +1,5 @@
 ﻿using AppData.AppDbContext;
+using AppData.Entities;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -10,20 +11,23 @@ namespace AppAPI.Repositories
     public class Repository<T> : IRepository<T> where T : class
     {
         protected readonly AppDBContext _context;
-        private readonly DbSet<T> _entities; // DbSet tương ứng với đối tượng T
+        private readonly DbSet<T> _entities;
 
         public Repository(AppDBContext context)
         {
             _context = context;
-            _entities = context.Set<T>(); // Gán DbSet cho đối tượng T
+            _entities = context.Set<T>();
         }
 
         public IEnumerable<T> GetAll()
         {
+            if (typeof(T) == typeof(Field))
+            {
+                return _context.Set<Field>().Include(f => f.FieldType).ToList() as IEnumerable<T>;
+            }
             return _entities.ToList();
         }
 
-        // Trả về IQueryable để có thể linh hoạt truy vấn
         public IQueryable<T> AsQueryable()
         {
             return _entities.AsQueryable();
@@ -34,7 +38,6 @@ namespace AppAPI.Repositories
             return _entities.Find(id);
         }
 
-        // Tìm các đối tượng theo điều kiện (predicate)
         public IEnumerable<T> Find(Expression<Func<T, bool>> predicate)
         {
             return _entities.Where(predicate).ToList();
@@ -46,7 +49,6 @@ namespace AppAPI.Repositories
             _context.SaveChanges();
         }
 
-        // Thêm nhiều đối tượng cùng một lúc
         public void AddRange(IEnumerable<T> entities)
         {
             _entities.AddRange(entities);
