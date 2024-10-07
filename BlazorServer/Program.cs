@@ -1,3 +1,5 @@
+using AppData.DTO;
+using AppData.Entities;
 using BlazorServer.Data;
 using BlazorServer.IServices;
 using BlazorServer.Services;
@@ -21,7 +23,7 @@ namespace BlazorServer
 
             builder.Services.AddScoped<IFieldService, FieldService>();
             builder.Services.AddScoped<IFieldTypeServices, FieldTypeServices>();
-
+            builder.Services.AddScoped<IServices<WebUser>, UserService>();
 
 
             var app = builder.Build();
