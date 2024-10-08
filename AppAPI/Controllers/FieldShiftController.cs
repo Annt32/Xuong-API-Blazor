@@ -42,30 +42,37 @@ namespace AppAPI.Controllers
 			return Ok(fieldshift);
 		}
 
-		[HttpPost("fieldshift-post")]
-		public IActionResult CreateField([FromBody] FieldShiftDTO fieldshift)
-		{
-			try
-			{
-				var entity = new FieldShift();
-				entity.IdFieldShift = Guid.NewGuid();
-				entity.IdShift = fieldshift.IdShift;
-				entity.IdFieldDetail = fieldshift.IdFieldDetail;
-				entity.Time = fieldshift.Time;
-				entity.Status = fieldshift.Status;
-				entity.CreatedAt = DateTime.UtcNow;
-				entity.UpdatedAt = DateTime.UtcNow;
+        [HttpPost("fieldshift-post")]
+        public IActionResult CreateField([FromBody] FieldShiftDTO fieldshift)
+        {
+            try
+            {
+                var entity = new FieldShift
+                {
+                    IdFieldShift = Guid.NewGuid(),
+                    IdShift = fieldshift.IdShift,
+                    Time = fieldshift.Time,
+                    Status = fieldshift.Status,
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
 
-				_fieldshiftRepository.Add(entity);
-				return Ok(new { message = "Thêm sân bóng thành công", entity });
-			}
-			catch (Exception ex)
-			{
-				return BadRequest(new { message = ex.Message });
-			}
-		}
+                _fieldshiftRepository.Add(entity);
+                return Ok(new { message = "Thêm sân bóng thành công", entity });
+            }
+            catch (DbUpdateException dbEx)
+            {
+                var innerException = dbEx.InnerException?.Message ?? dbEx.Message;
+                return BadRequest(new { message = $"Error: {innerException}" });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
 
-		[HttpPut("fieldshift-put/{id}")]
+
+        [HttpPut("fieldshift-put/{id}")]
 		public IActionResult UpdateField(Guid id, [FromBody] FieldShiftDTO fieldshiftUpdate)
 		{
 			try

@@ -16,8 +16,8 @@ namespace AppData.Entities
         [ForeignKey("Shift")]
         public Guid IdShift { get; set; }
 
-        [ForeignKey("FieldDetail")]
-        public Guid IdFieldDetail { get; set; }
+        //[ForeignKey("FieldDetail")]
+        //public Guid IdFieldDetail { get; set; }
 
         public DateTime Time { get; set; }
         public int Status { get; set; }
@@ -28,7 +28,7 @@ namespace AppData.Entities
 
         // Navigation properties
         public Shift Shift { get; set; }
-        public ICollection<FieldDetail> FieldDetails { get; set; }
+        //public ICollection<FieldDetail> FieldDetails { get; set; }
     }
 
 }
