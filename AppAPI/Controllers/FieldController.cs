@@ -45,6 +45,7 @@ namespace AppAPI.Controllers
             try
             {
                 field.Id = Guid.NewGuid();
+                field.Status = 1;
                 field.CreatedAt = DateTime.UtcNow;
                 field.UpdatedAt = DateTime.UtcNow;
 
