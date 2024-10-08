@@ -21,8 +21,10 @@ namespace AppAPI
             builder.Services.AddSwaggerGen();
 
             builder.Services.AddScoped<IRepository<Field>, Repository<Field>>();
+            builder.Services.AddScoped<IRepository<FieldShift>, Repository<FieldShift>>();
 
-            var app = builder.Build();
+            builder.Services.AddAutoMapper(typeof(AutoMapperProfile.AppMapperProfile).Assembly);
+			var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

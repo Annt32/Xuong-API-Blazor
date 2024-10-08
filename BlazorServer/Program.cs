@@ -1,4 +1,6 @@
 using BlazorServer.Data;
+using BlazorServer.IServices;
+using BlazorServer.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 
@@ -18,8 +20,12 @@ namespace BlazorServer
             builder.Services.AddHttpClient();
 
             builder.Services.AddScoped<IFieldService, FieldService>();
-
-            var app = builder.Build();
+            builder.Services.AddScoped<IFieldShiftService, FieldShiftService>();
+            builder.Services.AddScoped(sp => new HttpClient
+            {
+                BaseAddress = new Uri("https://localhost:7143")
+            });
+			var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
