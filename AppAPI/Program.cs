@@ -31,7 +31,9 @@ namespace AppAPI
 
             //Auto Mapper
             builder.Services.AddAutoMapper(typeof(AutoMapperProfile.AutoMapperProfile).Assembly);
+            builder.Services.AddScoped<IRepository<FieldShift>, Repository<FieldShift>>();
 
+            builder.Services.AddAutoMapper(typeof(AutoMapperProfile.AppMapperProfile).Assembly);
 			var app = builder.Build();
 
             // Configure the HTTP request pipeline.
