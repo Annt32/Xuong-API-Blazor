@@ -33,11 +33,11 @@
                     <input type="text" id="IdShift" @bind="fieldShift.IdShift" class="form-control" placeholder="IdShift" />
                     <ValidationMessage For="@(() => fieldShift.IdShift)" />
                 </div>
-                <div class="form-group">
+               @*  <div class="form-group">
                     <label for="IdFieldDetail">IdFieldDetail</label>
                     <input type="text" id="IdFieldDetail" @bind="fieldShift.IdFieldDetail" class="form-control" placeholder="IdFieldDetail" />
                     <ValidationMessage For="@(() => fieldShift.IdFieldDetail)" />
-                </div>
+                </div> *@
                 <div class="form-group">
                     <label for="fieldShiftName">Thời Gian Ca</label>
                     <input type="text" id="fieldShiftName" @bind="fieldShift.Time" class="form-control" placeholder="Thoi Gian Ca" />
@@ -229,7 +229,7 @@
                 {
                     IdFieldShift = fieldshiftToEdit.IdFieldShift,
                     IdShift = fieldshiftToEdit.IdShift,
-                    IdFieldDetail = fieldshiftToEdit.IdFieldDetail,
+                    // IdFieldDetail = fieldshiftToEdit.IdFieldDetail,
                     Time = fieldshiftToEdit.Time,
                     Status = fieldshiftToEdit.Status,
                     CreatedAt = fieldshiftToEdit.CreatedAt,
