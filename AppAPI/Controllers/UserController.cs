@@ -62,7 +62,6 @@ namespace AppAPI.Controllers
         }
 
         // PUT api/user/update/{id}
-        // PUT api/user/update/{id}
         [HttpPut("update/{id}")]
         public IActionResult UpdateUser(Guid id, [FromBody] WebUser value)
         {
@@ -74,19 +73,17 @@ namespace AppAPI.Controllers
             }
 
             // Giữ nguyên UserId và cập nhật lại các thông tin khác từ value
-            entity.FullName = value.FullName; // Cập nhật tên
-            entity.Email = value.Email; // Cập nhật email
-            entity.PhoneNumber = value.PhoneNumber; // Cập nhật số điện thoại
-            entity.Address = value.Address; // Cập nhật địa chỉ
-            entity.Password = value.Password; // Cập nhật mật khẩu (có thể cần mã hóa nếu cần thiết)
-            entity.Status = value.Status; // Cập nhật trạng thái
-            entity.UpdatedAt = DateTime.UtcNow; // Cập nhật lại thời gian chỉnh sửa
-                                                // Bạn có thể bổ sung thêm các trường khác nếu cần
+            entity.FullName = value.FullName;
+            entity.Email = value.Email; 
+            entity.PhoneNumber = value.PhoneNumber;
+            entity.Address = value.Address; 
+            entity.Password = value.Password; 
+            entity.Status = value.Status; 
+            entity.UpdatedAt = DateTime.UtcNow;
+                                               
 
-            // Thực hiện cập nhật thông tin vào database
             _userRepository.ModifileUpdate(entity);
 
-            // Trả về kết quả cập nhật thành công
             return Ok(new { message = "Cập nhật người dùng thành công", value = entity });
         }
 

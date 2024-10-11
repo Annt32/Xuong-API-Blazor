@@ -32,13 +32,16 @@ namespace AppData.AppDbContext
         public DbSet<DrinkDetail> DrinkDetails { get; set; }
         public DbSet<Parameter> Parameters { get; set; }
         public DbSet<ParameterType> ParameterTypes { get; set; }
-        public DbSet<FieldDetail> FieldDetails { get; set; }
         public DbSet<FieldShift> FieldShifts { get; set; }
         public DbSet<FieldType> FieldTypes { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
+<<<<<<< HEAD
             optionsBuilder.UseSqlServer("Data Source=MRG;Initial Catalog=XuongTH2;Integrated Security=True;Trust Server Certificate=True");
+=======
+            optionsBuilder.UseSqlServer("Data Source=DESKTOP-PMB8531\\SQLEXPRESS;Initial Catalog=XuongTH2;Integrated Security=True;Trust Server Certificate=True");
+>>>>>>> 11-10
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

@@ -26,6 +26,26 @@ namespace AppAPI.Controllers
             return Ok(lst.Select(x => _mapper.Map<FieldTypeDTO>(x)).ToList());
         }
 
+        [HttpGet("get-id/{id}")]
+        public async Task<IActionResult> GetById(Guid id)
+        {
+            try
+            {
+                var entity = _repos.GetById(id);
+                if (entity == null)
+                {
+                    return NotFound("Không tìm thấy loại sân bóng với ID này");
+                }
+
+                var fieldTypeDTO = _mapper.Map<FieldTypeDTO>(entity);
+                return Ok(fieldTypeDTO);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
         [HttpPost("create")]
         public async Task<IActionResult> Create([FromBody] FieldTypeCreateRequest input)
         {
@@ -48,7 +68,7 @@ namespace AppAPI.Controllers
             }
         }
 
-        [HttpPut("update")]
+        [HttpPut("update/{id}")]
 		public async Task<IActionResult> Update([FromBody] FieldTypeUpdateRequest input)
 		{
 			try
@@ -76,27 +96,17 @@ namespace AppAPI.Controllers
 			}
 		}
 
-        [HttpDelete("delete")]
-        public async Task<IActionResult> Delete([FromBody] FieldTypeDelRequest input)
+        [HttpDelete("delete/{id}")]
+        public IActionResult DeleteField(Guid id)
         {
-            try
+            var field = _repos.GetById(id);
+            if (field == null)
             {
-                var entity = _repos.GetById(input.Id);
-
-                if(entity == null)
-                {
-                    return BadRequest("Not found");
-                }
-
-                _repos.Remove(entity);
-
-                return Ok("Xóa thành công " + entity.Name);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest($"{ex.Message}");
+                return NotFound("Field not found");
             }
 
+            _repos.Remove(field);
+            return Ok(new { message = "Xóa sân bóng thành công" });
         }
-	}
+    }
 }

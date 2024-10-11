@@ -1,0 +1,261 @@
+﻿@page "/fieldtypes"
+@using AppData.DTO.FieldType_DTO
+@using BlazorServer.IServices
+@inject IFieldTypeServices FieldTypeService
+@inject IJSRuntime JS
+
+<h3>Quản Lý Loại Sân Bóng</h3>
+
+<div class="row">
+    <!-- Thông Tin Loại Sân -->
+    <div class="col-md-4">
+        <div class="card p-3">
+            <div class="card-header border mb-2">
+                <strong>Thông Tin</strong>
+            </div>
+            <EditForm Model="@fieldType" OnValidSubmit="HandleSubmit" OnInvalidSubmit="HandleInvalidSubmit">
+                <DataAnnotationsValidator />
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert @((errorMessage.Contains("thành công") ? "alert-success" : "alert-danger"))" role="alert">
+                        @errorMessage
+                    </div>
+                }
+
+                <!-- Các trường thông tin loại sân -->
+                <div class="form-group mb-1">
+                    <label for="typeName">Tên Loại Sân</label>
+                    <input type="text" id="typeName" @bind="fieldType.Name" class="form-control" placeholder="Tên loại sân" />
+                    <ValidationMessage For="@(() => fieldType.Name)" />
+                </div>
+                <div class="form-group mb-1">
+                    <label for="price">Giá</label>
+                    <input type="number" id="price" @bind="fieldType.Price" class="form-control" placeholder="Giá" />
+                    <ValidationMessage For="@(() => fieldType.Price)" />
+                </div>
+                <div class="form-group mb-1">
+                    <label for="typeName">Miêu tả</label>
+                    <input type="text" id="typeName" @bind="fieldType.Description" class="form-control" placeholder="Miêu tả sân" />
+                    <ValidationMessage For="@(() => fieldType.Description)" />
+                </div>
+                <!-- Nút Tạo và Cập Nhật -->
+                <div class="form-group">
+                    @if (fieldType.Id == Guid.Empty)
+                    {
+                        <button type="submit" class="btn btn-primary">Tạo</button>
+                    }
+                    else
+                    {
+                        <button type="submit" class="btn btn-warning">Cập Nhật</button>
+                    }
+                </div>
+            </EditForm>
+
+        </div>
+    </div>
+
+    <!-- Danh Sách Loại Sân -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <strong>Danh Sách Loại Sân</strong>
+                <div class="input-group mt-2">
+                    <input type="text" class="form-control" placeholder="Tìm kiếm tên loại sân..." @bind="searchText" />
+                    <div class="input-group-append">
+                        <button class="btn btn-secondary" @onclick="SearchFieldTypes">
+                            <i class="fas fa-search"></i> Tìm Kiếm
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Tên</th>
+                            <th>Giá</th>
+                            <th>Miêu tả</th>
+                            <th>Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (fieldTypes == null)
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center">Đang tải dữ liệu...</td>
+                            </tr>
+                        }
+                        else if (!fieldTypes.Any())
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center">Không có loại sân nào để hiển thị.</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            int index = 0;
+                            @foreach (var fieldType in fieldTypes)
+                            {
+                                <tr>
+                                    <td>@(++index)</td>
+                                    <td>@fieldType.Name</td>
+                                    <td>@fieldType.Price.ToString("C")</td>
+                                    <td>@fieldType.Description</td>
+                                    <td>
+                                        <button class="btn btn-info" @onclick="() => EditFieldType(fieldType.Id)">
+                                            <i class="fas fa-edit"></i> Sửa
+                                        </button>
+                                        <button class="btn btn-danger" @onclick="() => ConfirmDelete(fieldType.Id)">
+                                            <i class="fas fa-trash-alt"></i> Xóa
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<FieldTypeDTO> fieldTypes = new List<FieldTypeDTO>();
+    private FieldTypeDTO fieldType = new FieldTypeDTO();
+    private string searchText = string.Empty;
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadFieldTypes();
+    }
+
+    private async Task LoadFieldTypes()
+    {
+        fieldTypes = await FieldTypeService.GetAllFieldType();
+    }
+
+    private async Task CreateFieldType()
+    {
+        try
+        {
+            bool success = await FieldTypeService.CreateFieldAsync(new AppData.Entities.FieldType
+                {
+                    Id = Guid.NewGuid(),
+                    Name = fieldType.Name,
+                    Price = fieldType.Price,
+                    Description = fieldType.Description
+                });
+
+
+            if (success)
+            {
+                await LoadFieldTypes();
+                fieldType = new FieldTypeDTO();
+                errorMessage = "Đã tạo mới thành công!";
+            }
+            else
+            {
+                errorMessage = "Không thể tạo loại sân mới. Hãy kiểm tra lại dữ liệu.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+        }
+    }
+
+    private async Task UpdateFieldType()
+    {
+        try
+        {
+            bool success = await FieldTypeService.UpdateFieldAsync(fieldType.Id, new AppData.Entities.FieldType
+                {
+                    Id = fieldType.Id,
+                    Name = fieldType.Name,
+                    Price = fieldType.Price,
+                    Description = fieldType.Description
+                });
+
+            if (success)
+            {
+                await LoadFieldTypes();
+                fieldType = new FieldTypeDTO();
+                errorMessage = "Cập nhật thành công!";
+            }
+            else
+            {
+                errorMessage = "Không thể cập nhật loại sân. Hãy kiểm tra lại dữ liệu.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Đã xảy ra lỗi: {ex.Message}";
+        }
+    }
+
+    private void HandleInvalidSubmit()
+    {
+        Console.WriteLine("Form không hợp lệ. Hãy kiểm tra các trường nhập liệu!");
+    }
+
+    private async Task HandleSubmit()
+    {
+        if (fieldType.Id == Guid.Empty)
+        {
+            await CreateFieldType();
+        }
+        else
+        {
+            await ConfirmUpdateFieldType();
+        }
+    }
+
+    private async Task EditFieldType(Guid id)
+    {
+        var fieldTypeToEdit = await FieldTypeService.GetFieldByIdAsync(id);
+        if (fieldTypeToEdit != null)
+        {
+            fieldType = fieldTypeToEdit;
+        }
+    }
+
+    private async Task ConfirmDelete(Guid id)
+    {
+        bool confirmed = await JS.InvokeAsync<bool>("confirmAction", "Bạn có chắc chắn muốn xóa loại sân này?");
+        if (confirmed)
+        {
+            await DeleteFieldType(id);
+        }
+    }
+
+    private async Task DeleteFieldType(Guid id)
+    {
+        await FieldTypeService.DeleteFieldAsync(id);
+        await LoadFieldTypes();
+    }
+
+    private async Task ConfirmUpdateFieldType()
+    {
+        bool confirmed = await JS.InvokeAsync<bool>("confirmAction", "Bạn có chắc chắn muốn cập nhật loại sân này?");
+        if (confirmed)
+        {
+            await UpdateFieldType();
+        }
+    }
+
+    private void SearchFieldTypes()
+    {
+        if (string.IsNullOrEmpty(searchText))
+        {
+            LoadFieldTypes();
+        }
+        else
+        {
+            fieldTypes = fieldTypes
+                .Where(ft => ft.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+    }
+}

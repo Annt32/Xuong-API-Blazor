@@ -28,7 +28,11 @@ namespace AppData.Entities
 
         // Navigation properties
         public Shift Shift { get; set; }
+<<<<<<< HEAD
         //public ICollection<FieldDetail> FieldDetails { get; set; }
+=======
+        public Field Field { get; set; }
+>>>>>>> 11-10
     }
 
 }

@@ -31,7 +31,7 @@ namespace AppData.Entities
 
         // Navigation properties
         [JsonIgnore]
-        public ICollection<FieldDetail> FieldDetails { get; set; } = new List<FieldDetail>();
+        public ICollection<FieldShift> FieldShifts { get; set; } = new List<FieldShift>();
 
         [JsonIgnore]
         public FieldType? FieldType { get; set; }
