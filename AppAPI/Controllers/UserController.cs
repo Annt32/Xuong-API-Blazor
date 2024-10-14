@@ -55,7 +55,7 @@ namespace AppAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> Create([FromBody] WebUser value, string roleName, string UserNow, string pass)
+        public async Task<IActionResult> Create([FromBody] WebUser value, string roleName, string UserNow)
         {
 
 
@@ -71,7 +71,7 @@ namespace AppAPI.Controllers
                 CreatedAt = DateTime.UtcNow,
                 CreatedBy = UserNow
             };
-            IdentityResult result = await _userManager.CreateAsync(user, pass);
+            IdentityResult result = await _userManager.CreateAsync(user, value.Password);
 
             if (result.Succeeded)
             {
@@ -118,7 +118,7 @@ namespace AppAPI.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> Edit([FromBody] WebUser value, string roleName, string pass,string userNow)
+        public async Task<ActionResult> Edit([FromBody] WebUser value, string roleName)
         {
             var passwordHasher = new PasswordHasher<User>();
             var user1 = await _userManager.FindByNameAsync(value.UserName);
@@ -127,14 +127,14 @@ namespace AppAPI.Controllers
             {
                 var id = user1.Id;
                 user1.UserName = value.UserName;
-                user1.PasswordHash = passwordHasher.HashPassword(user1, pass);
+                user1.PasswordHash = passwordHasher.HashPassword(user1, value.Password);
                 user1.Email = value.Email;
                 user1.PhoneNumber = value.PhoneNumber;
                 user1.FullName = value.FullName;
                 user1.Address = value.Address;
                 user1.Status = value.Status;
                 user1.UpdatedAt = DateTime.UtcNow;
-                user1.UpdatedBy = userNow;
+                user1.UpdatedBy = "";
                 var result = await _userManager.UpdateAsync(user1);
                 IdentityResult addRoleResultStaff;
                 IdentityResult addRoleResultAdmin;
