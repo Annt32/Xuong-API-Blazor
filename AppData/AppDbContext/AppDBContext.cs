@@ -5,10 +5,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using AppData.DTO;
+using Microsoft.AspNetCore.Identity;
+using XuongTT_API.Model;
 
 namespace AppData.AppDbContext
 {
-    public class AppDBContext : DbContext
+    public class AppDBContext : IdentityDbContext<User, Role, Guid>
     {
         public AppDBContext()
         {
@@ -37,11 +41,12 @@ namespace AppData.AppDbContext
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlServer("Data Source=DESKTOP-PMB8531\\SQLEXPRESS;Initial Catalog=XuongTH2;Integrated Security=True;Trust Server Certificate=True");
+            optionsBuilder.UseSqlServer("Data Source=DO_HUY_HOANG;Initial Catalog=XuongTH2;Integrated Security=True;Trust Server Certificate=True");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Seed();
             base.OnModelCreating(modelBuilder);
         }
     }
