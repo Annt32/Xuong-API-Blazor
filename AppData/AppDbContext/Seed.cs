@@ -15,7 +15,7 @@ namespace XuongTT_API.Model
                 new Role{Id = Guid.NewGuid(), Name = "Staff", NormalizedName="STAFF",Status = 1 ,CreatedAt = DateTime.Now,UpdatedAt = DateTime.Now},
                 new Role{Id = Guid.NewGuid(), Name = "Customer", NormalizedName="CUSTOMER",Status = 1 ,CreatedAt = DateTime.Now,UpdatedAt = DateTime.Now},
             };
-            builder.Entity<IdentityRole<Guid>>().HasData(roles);
+            builder.Entity<Role>().HasData(roles);
             //static Users
             var passwordHasher = new PasswordHasher<User>();
             List<User> users = new List<User>()

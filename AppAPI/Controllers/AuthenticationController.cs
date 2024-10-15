@@ -1,4 +1,4 @@
-﻿using ClassLibrary1.Authentication;
+﻿using AppData.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
