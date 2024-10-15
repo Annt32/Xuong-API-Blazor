@@ -1,7 +1,8 @@
 ﻿@page "/FieldShifts"
 @using AppData.Entities
 @using BlazorServer.IServices
-
+@using AppData.AppDbContext;
+@inject AppDBContext _dbcontext;
 @inject IFieldShiftService FieldshiftService
 @inject IJSRuntime JS
 <h3>Quản Lý Ca Sân Bóng</h3>
@@ -13,6 +14,10 @@
             <div class="card-header">
                 <strong>Thông Tin</strong>
             </div>
+            @if (b==false)
+            {
+                <p>Ca Ban Xoa Da Co Hoa Don</p>
+            }
             <EditForm Model="@fieldShift" OnValidSubmit="HandleSubmit" OnInvalidSubmit="HandleInvalidSubmit">
                 <DataAnnotationsValidator />
                 @if (!string.IsNullOrEmpty(errorMessage))
@@ -23,7 +28,7 @@
                 }
 
                 <!-- Các trường thông tin sân bóng -->
-                <div class="form-group">
+                @* <div class="form-group">
                     <label for="IdFieldShift">IdFieldShift</label>
                     <input type="text" id="IdFieldShift" @bind="fieldShift.IdFieldShift" class="form-control" placeholder="IdFieldShift" />
                     <ValidationMessage For="@(() => fieldShift.IdFieldShift)" />
@@ -32,7 +37,7 @@
                     <label for="IdShift">IdShift</label>
                     <input type="text" id="IdShift" @bind="fieldShift.IdShift" class="form-control" placeholder="IdShift" />
                     <ValidationMessage For="@(() => fieldShift.IdShift)" />
-                </div>
+                </div> *@
                @*  <div class="form-group">
                     <label for="IdFieldDetail">IdFieldDetail</label>
                     <input type="text" id="IdFieldDetail" @bind="fieldShift.IdFieldDetail" class="form-control" placeholder="IdFieldDetail" />
@@ -269,13 +274,24 @@
         }
     }
 
-
+    bool b=true;
     private async Task ConfirmDelete(Guid id)
     {
         bool confirmed = await JS.InvokeAsync<bool>("confirmAction", "Bạn có chắc chắn muốn xóa ca sân này?");
         if (confirmed)
         {
-            await DeleteField(id);
+            var check = _dbcontext.InvoiceDetails.FirstOrDefault(x => x.IdFieldShift == id);
+            if (check==null)
+            {
+                await DeleteField(id);
+                b = true;
+            }
+            else
+            {
+                b = false;
+
+            }
+           
         }
     }
 }

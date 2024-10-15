@@ -1,9 +1,10 @@
+using AppData.AppDbContext;
 using BlazorServer.Data;
 using BlazorServer.IServices;
 using BlazorServer.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-
+using AppData.AppDbContext;
 namespace BlazorServer
 {
     public class Program
@@ -21,6 +22,8 @@ namespace BlazorServer
 
             builder.Services.AddScoped<IFieldService, FieldService>();
             builder.Services.AddScoped<IFieldShiftService, FieldShiftService>();
+            builder.Services.AddDbContext<AppDBContext>();
+
             builder.Services.AddScoped(sp => new HttpClient
             {
                 BaseAddress = new Uri("https://localhost:7143")
