@@ -31,6 +31,11 @@
                     <ValidationMessage For="@(() => field.FieldName)" />
                 </div>
                 <div class="form-group mb-1">
+                    <label for="fieldLocation">Địa điểm</label>
+                    <input type="text" id="fieldLocation" @bind="field.Location" class="form-control" placeholder="Địa điểm" />
+                    <ValidationMessage For="@(() => field.Location)" />
+                </div>
+                <div class="form-group mb-1">
                     <label for="fieldType">Loại Sân Bóng</label>
                     <InputSelect @bind-Value="SelectedFieldTypeId" class="form-control" TValue="Guid">
                         <option value="@Guid.Empty">--Chọn loại sân--</option>
@@ -61,7 +66,7 @@
 
                 <!-- Nút Tạo và Cập Nhật -->
                 <div class="form-group">
-                    @if (field.Id == Guid.Empty)
+                    @if (field.IdField == Guid.Empty)
                     {
                         <button type="submit" class="btn btn-primary">Tạo</button>
                     }
@@ -126,10 +131,10 @@
                                     <td>@field.FieldTypePrice.ToString("C")</td>
                                     <td>@(field.Status == 1 ? "Bình thường" : "Sửa chữa")</td>
                                     <td>
-                                        <button class="btn btn-info" @onclick="() => EditField(field.Id)">
+                                        <button class="btn btn-info" @onclick="() => EditField(field.IdField)">
                                             <i class="fas fa-edit"></i> Sửa
                                         </button>
-                                        <button class="btn btn-danger" @onclick="() => ConfirmDelete(field.Id)">
+                                        <button class="btn btn-danger" @onclick="() => ConfirmDelete(field.IdField)">
                                             <i class="fas fa-trash-alt"></i> Xóa
                                         </button>
                                     </td>
@@ -231,7 +236,7 @@
         {
             field.FieldTypeId = SelectedFieldTypeId;
 
-            bool success = await FieldService.UpdateFieldAsync(field.Id, field);
+            bool success = await FieldService.UpdateFieldAsync(field.IdField, field);
 
             if (success)
             {
@@ -259,7 +264,7 @@
 
     private async Task HandleSubmit()
     {
-        if (field.Id == Guid.Empty)
+        if (field.IdField == Guid.Empty)
         {
             await CreateField(); // Gọi tạo mới nếu IdField trống
         }
@@ -277,8 +282,9 @@
         {
             field = new Field
                 {
-                    Id = fieldToEdit.Id,
+                    IdField = fieldToEdit.IdField,
                     FieldName = fieldToEdit.FieldName,
+                    Location = fieldToEdit.Location,
                     Status = fieldToEdit.Status,
                     CreatedAt = fieldToEdit.CreatedAt,
                     UpdatedAt = fieldToEdit.UpdatedAt,

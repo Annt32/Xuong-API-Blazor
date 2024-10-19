@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.Json.Serialization;
 
 namespace AppData.Entities
 {
@@ -31,7 +32,9 @@ namespace AppData.Entities
         public string? UpdatedBy { get; set; }
 
         // Navigation properties
+        [JsonIgnore]
         public User User { get; set; }
+        [JsonIgnore]
         public Shift Shift { get; set; }
     }
 

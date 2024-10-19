@@ -35,7 +35,7 @@ public class FieldService : IFieldService
 
             return new FieldViewModel
             {
-                Id = f.Id,
+                IdField = f.IdField,
                 FieldName = f.FieldName,
                 Status = f.Status,
                 FieldTypeId = f.FieldTypeId,
@@ -67,7 +67,7 @@ public class FieldService : IFieldService
 
         return new FieldViewModel
         {
-            Id = field.Id,
+            IdField = field.IdField,
             FieldName = field.FieldName,
             Status = field.Status,
             FieldTypeId = field.FieldTypeId,

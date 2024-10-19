@@ -16,11 +16,10 @@ namespace AppData.Entities
         [ForeignKey("Shift")]
         public Guid IdShift { get; set; }
 
-        //[ForeignKey("FieldDetail")]
-        //public Guid IdFieldDetail { get; set; }
-
-        public DateTime Time { get; set; }
+        [ForeignKey("IdField")]
+        public Guid IdField { get; set; }
         public int Status { get; set; }
+        public DateTime Time { get; set; }
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public string? CreatedBy { get; set; }

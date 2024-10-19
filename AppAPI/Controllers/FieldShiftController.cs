@@ -51,7 +51,6 @@ namespace AppAPI.Controllers
                 {
                     IdFieldShift = Guid.NewGuid(),
                     IdShift = fieldshift.IdShift,
-                    Time = fieldshift.Time,
                     Status = fieldshift.Status,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
@@ -82,7 +81,6 @@ namespace AppAPI.Controllers
 				{
 					return BadRequest();
 				}
-				entity.Time = fieldshiftUpdate.Time;
 				entity.Status = fieldshiftUpdate.Status;
 				entity.CreatedAt = DateTime.UtcNow;
 				entity.UpdatedAt = DateTime.UtcNow;
