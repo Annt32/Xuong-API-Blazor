@@ -25,13 +25,10 @@ namespace BlazorServer
             // Đăng ký các dịch vụ
             builder.Services.AddScoped<IFieldService, FieldService>();
             builder.Services.AddHttpClient<IServices<WebUser>, UserService>(); // Sửa lại cách đăng ký UserService với HttpClient
-            builder.Services.AddScoped<IFieldTypeServices, FieldTypeServices>();
+            builder.Services.AddScoped<IFieldTypeServices, FieldTypeService>();
             builder.Services.AddScoped<IFieldShiftService, FieldShiftService>();
-            builder.Services.AddScoped(sp => new HttpClient
-            {
-                BaseAddress = new Uri("https://localhost:7143")
-            });
-			var app = builder.Build();
+
+            var app = builder.Build();
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
