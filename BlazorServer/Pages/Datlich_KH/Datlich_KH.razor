@@ -1,0 +1,253 @@
+﻿@page "/dat-lich"
+@using System.Globalization
+
+<div>
+	<header>
+	</header>
+	<div class="col-12">
+		<div class="row">
+			<!-- Lịch bé trong col-2 -->
+			<div class="col-2">
+				<div class="col-12">
+					<h6 align="center">Chọn ngày</h6>
+					<hr />
+					<div class="calendar-container">
+						<div class="row nav-buttons">
+							<button class="btn col-1" @onclick="PreviousMonth">&lt;</button>
+							<h5 class="col-9 text-center">@monthAndYear</h5>
+							<button class="btn col-1" @onclick="NextMonth">&gt;</button>
+						</div>
+						<table class="table table-bordered">
+							<thead>
+								<tr>
+									<th>Sun</th>
+									<th>Mon</th>
+									<th>Tue</th>
+									<th>Wed</th>
+									<th>Thu</th>
+									<th>Fri</th>
+									<th>Sat</th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (var week in smallCalendar)
+								{
+									<tr>
+										@foreach (var day in week)
+										{
+											<td class="@GetClassForDate(day)" @onclick="() => SelectDate(day)">
+												@day.Day
+											</td>
+										}
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			<!-- Lịch lớn trong col-7 -->
+			<div class="col-7">
+				<h6 align="center">Đặt lịch</h6>
+				<hr />
+				<div class="calendar-large">
+					<table class="table table-bordered">
+						<thead>
+							<tr>
+								<th>Sun</th>
+								<th>Mon</th>
+								<th>Tue</th>
+								<th>Wed</th>
+								<th>Thu</th>
+								<th>Fri</th>
+								<th>Sat</th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach (var week in largeCalendar)
+							{
+								<tr>
+									@foreach (var day in week)
+									{
+										<td class="@GetClassForDate(day)">
+											@day.Day
+										</td>
+									}
+								</tr>
+							}
+							
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<!-- Danh sách sự kiện trong col-3 -->
+			<div class="col-3">
+				<h6 align="center">Sự kiện</h6>
+				<hr />
+				<div class="mt-2">
+					<table class="table table-sukien">
+						<thead>
+							<tr>
+								<th>Thông tin ca</th>
+								<th>Thao tác</th>
+							</tr>
+						</thead>
+						<tbody>
+							<!-- Sự kiện sẽ được thêm ở đây -->
+						</tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+<style>
+	/* Tùy chỉnh các ô lịch */
+	table td {
+		text-align: center;
+		padding: 10px;
+		cursor: pointer;
+		border: 1px solid #ddd;
+	}
+
+	/* Ngày được chọn */
+	.selected-date {
+		background-color: #0d6efd;
+		color: white;
+		border-radius: 50%;
+	}
+
+	/* Ngày hiện tại */
+	.today {
+		background-color: #ffc107;
+		color: white;
+		border-radius: 50%;
+	}
+
+	/* Di chuyển giữa các tháng */
+	.nav-buttons button {
+		background: none;
+		border: none;
+		font-size: 1.5em;
+		cursor: pointer;
+		color: #0d6efd;
+	}
+
+	.nav-buttons h5 {
+		margin: 0;
+		font-size: 1.2em;
+	}
+
+	/* Lịch lớn */
+	.calendar-large {
+		border: 1px solid #ddd;
+		padding: 10px;
+		background-color: #f8f9fa;
+		border-radius: 10px;
+	}
+
+	/* Lịch nhỏ */
+	.calendar-container {
+		border: 1px solid #ddd;
+		padding: 10px;
+		background-color: #f8f9fa;
+		border-radius: 10px;
+	}
+
+		.calendar-container th{
+			font-size: 9px;
+		}
+
+		.calendar-container td{
+			font-size: 10px;
+		}
+
+	/* Header */
+	h6 {
+		font-weight: bold;
+		margin-bottom: 15px;
+	}
+
+	/* Divider */
+	hr {
+		border-top: 2px solid #0d6efd;
+	}
+
+	/* Bảng sự kiện */
+	.table-sukien th {
+		background-color: #0d6efd;
+		color: white;
+		text-align: center;
+	}
+
+	/* Khi hover */
+	table tbody tr td:hover {
+		background-color: #f1f1f1;
+	}
+</style>
+
+@code {
+	private DateTime currentMonth = DateTime.Now;
+	private string monthAndYear => currentMonth.ToString("MMMM yyyy", CultureInfo.InvariantCulture);
+	private DateTime selectedDate = DateTime.Now;
+
+	// Lịch bé và lớn
+	private List<List<DateTime>> smallCalendar = new List<List<DateTime>>();
+	private List<List<DateTime>> largeCalendar = new List<List<DateTime>>();
+
+	protected override void OnInitialized()
+	{
+		GenerateCalendars();
+	}
+
+	private void GenerateCalendars()
+	{
+		smallCalendar = GenerateCalendarForMonth(currentMonth);
+		largeCalendar = GenerateCalendarForMonth(currentMonth);
+	}
+
+	private List<List<DateTime>> GenerateCalendarForMonth(DateTime month)
+	{
+		var calendar = new List<List<DateTime>>();
+		var firstDayOfMonth = new DateTime(month.Year, month.Month, 1);
+		var firstDayOfWeek = firstDayOfMonth.AddDays(-(int)firstDayOfMonth.DayOfWeek);
+
+		for (int week = 0; week < 6; week++)
+		{
+			var weekRow = new List<DateTime>();
+			for (int day = 0; day < 7; day++)
+			{
+				weekRow.Add(firstDayOfWeek.AddDays(week * 7 + day));
+			}
+			calendar.Add(weekRow);
+		}
+
+		return calendar;
+	}
+
+	private void PreviousMonth()
+	{
+		currentMonth = currentMonth.AddMonths(-1);
+		GenerateCalendars();
+	}
+
+	private void NextMonth()
+	{
+		currentMonth = currentMonth.AddMonths(1);
+		GenerateCalendars();
+	}
+
+	private void SelectDate(DateTime date)
+	{
+		selectedDate = date;
+		StateHasChanged();
+	}
+
+	private string GetClassForDate(DateTime date)
+	{
+		return date.Date == selectedDate.Date ? "bg-primary text-white" : string.Empty;
+	}
+	}
