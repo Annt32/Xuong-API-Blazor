@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using AppAPI.Repositories;
 using AppData.Entities;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppAPI.Controllers
 {
@@ -22,14 +23,15 @@ namespace AppAPI.Controllers
         [HttpGet("fields-get")]
         public IActionResult GetFields()
         {
-            var fields = _fieldRepository.GetAll();
+            // Sử dụng Include để nạp FieldType
+            var fields = _fieldRepository.AsQueryable().Include(f => f.FieldType).ToList();
             return Ok(fields);
         }
 
         [HttpGet("fields-get-id/{id}")]
         public IActionResult GetFieldById(Guid id)
         {
-            var field = _fieldRepository.GetById(id);
+            var field = _fieldRepository.AsQueryable().Include(f => f.FieldType).FirstOrDefault(f => f.Id == id);
             if (field == null)
             {
                 return NotFound("Field not found");
@@ -43,6 +45,7 @@ namespace AppAPI.Controllers
             try
             {
                 field.Id = Guid.NewGuid();
+                field.Status = 1;
                 field.CreatedAt = DateTime.UtcNow;
                 field.UpdatedAt = DateTime.UtcNow;
 
@@ -65,6 +68,7 @@ namespace AppAPI.Controllers
             }
 
             field.FieldName = fieldUpdate.FieldName;
+            field.FieldTypeId = fieldUpdate.FieldTypeId;
             field.Status = fieldUpdate.Status;
             field.UpdatedAt = DateTime.UtcNow;
             field.UpdatedBy = fieldUpdate.UpdatedBy;

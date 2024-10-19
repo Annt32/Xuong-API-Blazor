@@ -1,3 +1,5 @@
+﻿using AppData.DTO;
+using AppData.Entities;
 using BlazorServer.Data;
 using BlazorServer.IServices;
 using BlazorServer.Services;
@@ -17,12 +19,14 @@ namespace BlazorServer
             builder.Services.AddServerSideBlazor();
             builder.Services.AddSingleton<WeatherForecastService>();
 
+            // Đăng ký HttpClient
             builder.Services.AddHttpClient();
 
+            // Đăng ký các dịch vụ
             builder.Services.AddScoped<IFieldService, FieldService>();
-            builder.Services.AddScoped<IFieldTypeServices, FieldTypeServices>();
-
-
+            builder.Services.AddHttpClient<IServices<WebUser>, UserService>(); // Sửa lại cách đăng ký UserService với HttpClient
+            builder.Services.AddScoped<IFieldTypeServices, FieldTypeService>();
+            builder.Services.AddScoped<IFieldShiftService, FieldShiftService>();
 
             var app = builder.Build();
 
