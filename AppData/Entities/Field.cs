@@ -12,18 +12,17 @@ namespace AppData.Entities
     public class Field // sân
     {
         [Key]
-        public Guid Id { get; set; }
+        public Guid IdField { get; set; }
+        public Guid FieldTypeId { get; set; }
 
         [Required(ErrorMessage = "Tên sân bóng là bắt buộc")]
         [StringLength(100, ErrorMessage = "Tên sân bóng không được vượt quá 100 ký tự")]
         public string FieldName { get; set; }
+        public string Location { get; set; }
         
         [Required(ErrorMessage = "Trạng thái là bắt buộc")]
         [Range(0, 1, ErrorMessage = "Trạng thái chỉ có thể là 0 hoặc 1")]
-        public int Status { get; set; }
-
-        public Guid FieldTypeId { get; set; }
-
+        public int Status { get; set; }  
         public DateTime CreatedAt { get; set; }
         public DateTime UpdatedAt { get; set; }
         public string? CreatedBy { get; set; }

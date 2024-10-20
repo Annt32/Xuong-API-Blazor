@@ -1,17 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using System;
-using System.Collections.Generic;
+﻿using AppData.Entities;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
-namespace AppData.Entities
+namespace BlazorServer.Models
 {
-    public class Shift
+    public class ShiftViewModel
     {
-        [Key]
         public Guid IdShift { get; set; }
         public string ShiftName { get; set; }
         public string StartTime { get; set; } = "00:00:00";
@@ -22,9 +15,5 @@ namespace AppData.Entities
         public string? CreatedBy { get; set; }
         public string? UpdatedBy { get; set; }
 
-        // Navigation properties
-        [JsonIgnore]
-        public ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();
     }
-
 }

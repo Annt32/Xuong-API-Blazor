@@ -27,6 +27,7 @@ namespace BlazorServer
             builder.Services.AddHttpClient<IServices<WebUser>, UserService>(); // Sửa lại cách đăng ký UserService với HttpClient
             builder.Services.AddScoped<IFieldTypeServices, FieldTypeService>();
             builder.Services.AddScoped<IFieldShiftService, FieldShiftService>();
+            builder.Services.AddScoped<IShiftService, ShiftService>();
 
             var app = builder.Build();
 

@@ -31,7 +31,7 @@ namespace AppAPI.Controllers
         [HttpGet("fields-get-id/{id}")]
         public IActionResult GetFieldById(Guid id)
         {
-            var field = _fieldRepository.AsQueryable().Include(f => f.FieldType).FirstOrDefault(f => f.Id == id);
+            var field = _fieldRepository.AsQueryable().Include(f => f.FieldType).FirstOrDefault(f => f.IdField == id);
             if (field == null)
             {
                 return NotFound("Field not found");
@@ -44,7 +44,7 @@ namespace AppAPI.Controllers
         {
             try
             {
-                field.Id = Guid.NewGuid();
+                field.IdField = Guid.NewGuid();
                 field.Status = 1;
                 field.CreatedAt = DateTime.UtcNow;
                 field.UpdatedAt = DateTime.UtcNow;
