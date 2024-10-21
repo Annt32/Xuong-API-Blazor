@@ -1,4 +1,6 @@
-﻿using AppData.DTO; // Sử dụng DTO
+﻿using AppData.DTO;
+using AppData.DTO.Field_DTO;
+using AppData.DTO.FieldType_DTO; // Sử dụng DTO
 
 namespace BlazorServer.IServices
 {
@@ -9,5 +11,9 @@ namespace BlazorServer.IServices
         Task<bool> CreateFieldshiftAsync(FieldShiftDTO fieldshift);
         Task<bool> UpdateFieldshiftAsync(Guid id, FieldShiftDTO updatedFieldShift);
         Task<bool> DeleteFieldshiftAsync(Guid id);
+
+        //
+        Task<List<FieldTypeDTO>> GetAllFieldTypeAsync();
+        Task<List<FieldDTO>> GetFieldByTypeAsync(Guid idtype);
     }
 }

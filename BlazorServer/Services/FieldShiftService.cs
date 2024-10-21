@@ -1,4 +1,6 @@
 ﻿using AppData.DTO; // Sử dụng DTO thay vì thực thể
+using AppData.DTO.Field_DTO;
+using AppData.DTO.FieldType_DTO;
 using BlazorServer.IServices;
 using Newtonsoft.Json;
 using System.Net.Http;
@@ -40,8 +42,24 @@ namespace BlazorServer.Services
             return JsonConvert.DeserializeObject<List<FieldShiftDTO>>(response); // Deserialize về DTO
         }
 
-        // Lấy FieldShift theo ID (sử dụng DTO)
-        public async Task<FieldShiftDTO> GetFieldshiftByIdAsync(Guid id)
+		public async Task<List<FieldTypeDTO>> GetAllFieldTypeAsync()
+		{
+            var response = await _httpClient.GetFromJsonAsync<List<FieldTypeDTO>>("https://localhost:7143/api/FieldType/get-all");
+
+            return response;
+		}
+
+		public async Task<List<FieldDTO>> GetFieldByTypeAsync(Guid idtype)
+		{
+			var response = await _httpClient.GetFromJsonAsync<List<FieldDTO>>("https://localhost:7143/api/Field/fields-get");
+
+            var lst = response.Where(x => x.FieldTypeId == idtype).ToList();
+
+            return lst;
+		}
+
+		// Lấy FieldShift theo ID (sử dụng DTO)
+		public async Task<FieldShiftDTO> GetFieldshiftByIdAsync(Guid id)
         {
             string requestURL = $"https://localhost:7143/api/Fieldshift/fieldshift-get-id/{id}";
             var response = await _httpClient.GetStringAsync(requestURL);

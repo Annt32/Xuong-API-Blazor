@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace AppData.Migrations
 {
-    public partial class app : Migration
+    public partial class CrDB : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -30,22 +30,21 @@ namespace AppData.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Fields",
+                name: "FieldTypes",
                 columns: table => new
                 {
-                    IdField = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    FieldName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Fields", x => x.IdField);
+                    table.PrimaryKey("PK_FieldTypes", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -91,8 +90,8 @@ namespace AppData.Migrations
                 {
                     IdShift = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ShiftName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    StartTime = table.Column<TimeSpan>(type: "time", nullable: false),
-                    EndTime = table.Column<TimeSpan>(type: "time", nullable: false),
+                    StartTime = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    EndTime = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -126,6 +125,31 @@ namespace AppData.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Fields",
+                columns: table => new
+                {
+                    IdField = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FieldTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    FieldName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Location = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Fields", x => x.IdField);
+                    table.ForeignKey(
+                        name: "FK_Fields_FieldTypes_FieldTypeId",
+                        column: x => x.FieldTypeId,
+                        principalTable: "FieldTypes",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Parameters",
                 columns: table => new
                 {
@@ -149,31 +173,6 @@ namespace AppData.Migrations
                         column: x => x.ParameterTypeId,
                         principalTable: "ParameterTypes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "FieldShifts",
-                columns: table => new
-                {
-                    IdFieldShift = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IdShift = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    IdFieldDetail = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Time = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_FieldShifts", x => x.IdFieldShift);
-                    table.ForeignKey(
-                        name: "FK_FieldShifts_Shifts_IdShift",
-                        column: x => x.IdShift,
-                        principalTable: "Shifts",
-                        principalColumn: "IdShift",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -262,32 +261,34 @@ namespace AppData.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "FieldDetails",
+                name: "FieldShifts",
                 columns: table => new
                 {
-                    IdFieldDetail = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IdFieldShift = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IdShift = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     IdField = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
+                    Time = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    FieldIdField = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_FieldDetails", x => x.IdFieldDetail);
+                    table.PrimaryKey("PK_FieldShifts", x => x.IdFieldShift);
                     table.ForeignKey(
-                        name: "FK_FieldDetails_Fields_IdField",
-                        column: x => x.IdField,
+                        name: "FK_FieldShifts_Fields_FieldIdField",
+                        column: x => x.FieldIdField,
                         principalTable: "Fields",
                         principalColumn: "IdField",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_FieldDetails_FieldShifts_IdFieldShift",
-                        column: x => x.IdFieldShift,
-                        principalTable: "FieldShifts",
-                        principalColumn: "IdFieldShift",
+                        name: "FK_FieldShifts_Shifts_IdShift",
+                        column: x => x.IdShift,
+                        principalTable: "Shifts",
+                        principalColumn: "IdShift",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -431,14 +432,14 @@ namespace AppData.Migrations
                 column: "IdServiceField");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FieldDetails_IdField",
-                table: "FieldDetails",
-                column: "IdField");
+                name: "IX_Fields_FieldTypeId",
+                table: "Fields",
+                column: "FieldTypeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FieldDetails_IdFieldShift",
-                table: "FieldDetails",
-                column: "IdFieldShift");
+                name: "IX_FieldShifts_FieldIdField",
+                table: "FieldShifts",
+                column: "FieldIdField");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FieldShifts_IdShift",
@@ -497,9 +498,6 @@ namespace AppData.Migrations
                 name: "DrinkDetails");
 
             migrationBuilder.DropTable(
-                name: "FieldDetails");
-
-            migrationBuilder.DropTable(
                 name: "Parameters");
 
             migrationBuilder.DropTable(
@@ -510,9 +508,6 @@ namespace AppData.Migrations
 
             migrationBuilder.DropTable(
                 name: "Drinks");
-
-            migrationBuilder.DropTable(
-                name: "Fields");
 
             migrationBuilder.DropTable(
                 name: "ParameterTypes");
@@ -533,10 +528,16 @@ namespace AppData.Migrations
                 name: "Invoices");
 
             migrationBuilder.DropTable(
+                name: "Fields");
+
+            migrationBuilder.DropTable(
                 name: "Shifts");
 
             migrationBuilder.DropTable(
                 name: "Users");
+
+            migrationBuilder.DropTable(
+                name: "FieldTypes");
         }
     }
 }

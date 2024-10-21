@@ -1,4 +1,5 @@
-﻿using AppData.DTO.FieldType_DTO;
+﻿using AppData.DTO.Field_DTO;
+using AppData.DTO.FieldType_DTO;
 using AppData.Entities;
 using AutoMapper;
 
@@ -12,6 +13,8 @@ namespace AppAPI.AutoMapperProfile
             CreateMap<FieldTypeCreateRequest, FieldType>();
             CreateMap<FieldTypeUpdateRequest, FieldType>();
             CreateMap<FieldTypeDelRequest, FieldType>();
+
+            CreateMap<FieldDTO, Field>().ReverseMap();
         }
     }
 }

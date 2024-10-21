@@ -1,5 +1,10 @@
 ﻿@page "/dat-lich"
 @using System.Globalization
+@using AppData.DTO
+@using AppData.DTO.FieldType_DTO
+@using AppData.DTO.Field_DTO
+@using BlazorServer.IServices
+@inject IFieldShiftService _svFS;
 
 <div>
 	<header>
@@ -76,7 +81,7 @@
 									}
 								</tr>
 							}
-							
+
 						</tbody>
 					</table>
 				</div>
@@ -105,7 +110,7 @@
 </div>
 
 <!--Modal-->
-@if(isActiveModal == 1)
+@if (isActiveModal == 1)
 {
 	<div class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
 		<div class="modal-dialog" role="document">
@@ -114,58 +119,69 @@
 					<div class="col-12">
 						<div class="row">
 							<div class="col-1">
-								<button type="button" class="close" @onclick="CloseModal" aria-label="Close">
+								<button type="button" class="btn" @onclick="CloseModal" aria-label="Close">
 									<span aria-hidden="true">&times;</span>
 								</button>
 							</div>
 							<div class="col-5">
-								<h6>Chỗ này cần sửa</h6>
+								<h6>Thông tin sân</h6>
 							</div>
 						</div>
 
 					</div>
 				</div>
 				<div class="modal-body">
-					@* <EditForm Model="@inputUpdate" OnValidSubmit="async () => await UpdatePromotion()">
+					<EditForm Model="@input" OnValidSubmit="async () => await CreateFieldShift()">
 						<DataAnnotationsValidator />
 						<div class="mb-3">
-							<label for="" class="form-label">Mã khuyến mại</label>
-							<InputText @bind-Value="inputUpdate.Code" class="form-control" />
-							<ValidationMessage For="@(() => inputUpdate.Code)" />
+							<label for="" class="form-label">Loại sân</label>
+							<InputSelect @bind-Value="_idFT" class="form-select">
+								<option selected value="@Guid.Empty">--Chọn loại sân--</option>
+								@foreach (var item in _lstFT)
+								{
+									<option value="@item.Id">@item.Name</option>
+								}
+							</InputSelect>
+
 						</div>
 						<div class="mb-3">
-							<label for="" class="form-label">Mô tả</label>
-							<InputText @bind-Value="inputUpdate.Description" class="form-control" />
+							<label for="" class="form-label">Sân số</label>
+							<InputSelect @bind-Value="input.IdField" class="form-select">
+								<option selected value="@Guid.Empty">--Chọn sân--</option>
+								@foreach (var item in _lstF)
+								{
+									<option value="@item.IdField">@item.FieldName</option>
+								}
+							</InputSelect>
 						</div>
+						@* <div class="mb-3">
+					<label for="" class="form-label">Ca</label>
+					<InputNumber @bind-Value="input.DiscountAmount" class="form-control" />
+					<ValidationMessage For="@(() => inputUpdate.DiscountAmount)" />
+					</div> *@
 						<div class="mb-3">
-							<label for="" class="form-label">Phần trăm giảm giá</label>
-							<InputNumber @bind-Value="inputUpdate.DiscountAmount" class="form-control" />
-							<ValidationMessage For="@(() => inputUpdate.DiscountAmount)" />
+							<label for="" class="form-label">Ngày</label>
+							<InputDate @bind-Value="selectedDate" class="form-control" readonly />
 						</div>
-						<div class="mb-3">
-							<label for="" class="form-label">Ngày bắt đầu</label>
-							<InputDate @bind-Value="inputUpdate.StartDate" class="form-control" />
-							<ValidationMessage For="@(() => inputUpdate.StartDate)" />
-						</div>
-						<div class="mb-3">
-							<label for="" class="form-label">Ngày kết thúc</label>
-							<InputDate @bind-Value="inputUpdate.EndDate" class="form-control" />
-							<ValidationMessage For="@(() => inputUpdate.EndDate)" />
-						</div>
-						<div class="mb-3">
-							<!--Status-->
-						</div>
-						@if (messageString == "Sửa thành công")
+						@* <div class="mb-3">
+					<label for="" class="form-label">Giá</label>
+					<InputDate @bind-Value="input.EndDate" class="form-control" />
+					<ValidationMessage For="@(() => inputUpdate.EndDate)" />
+					</div>
+					<div class="mb-3">
+					<!--Status-->
+					</div> *@
+						@if (messageString == "Đặt lịch thành công")
 						{
 							<p class="alert alert-success">@messageString</p>
 						}
-						else if (messageString == "Sửa thất bại")
+						else if (messageString == "Đặt lịch thất bại")
 						{
 							<p class="alert alert-danger">@messageString</p>
 						}
 
-						<button type="submit" class="btn btn-primary">Lưu</button>
-					</EditForm> *@
+						<button type="submit" class="btn btn-primary">Đặt</button>
+					</EditForm>
 				</div>
 			</div>
 		</div>
@@ -226,11 +242,11 @@
 		border-radius: 10px;
 	}
 
-		.calendar-container th{
+		.calendar-container th {
 			font-size: 9px;
 		}
 
-		.calendar-container td{
+		.calendar-container td {
 			font-size: 10px;
 		}
 
@@ -257,7 +273,7 @@
 		background-color: #f1f1f1;
 	}
 
-	
+
 	/*linh tinh*/
 	td {
 		text-align: center
@@ -277,14 +293,38 @@
 	private DateTime currentMonth = DateTime.Now;
 	private string monthAndYear => currentMonth.ToString("MMMM yyyy", CultureInfo.InvariantCulture);
 	private DateTime selectedDate = DateTime.Now;
-
 	// Lịch bé và lớn
 	private List<List<DateTime>> smallCalendar = new List<List<DateTime>>();
 	private List<List<DateTime>> largeCalendar = new List<List<DateTime>>();
 
-	protected override void OnInitialized()
+	//
+	private FieldShiftDTO input = new FieldShiftDTO();
+	private string messageString = "";
+
+	//
+	private List<FieldTypeDTO> _lstFT = new List<FieldTypeDTO>();
+	private Guid _idFT = Guid.Empty;
+	public Guid IdFT
+	{
+		get => _idFT;
+		set
+		{
+			if (_idFT != value)
+			{
+				_idFT = value;
+				LoadField(); // Gọi hàm load danh sách sân khi giá trị thay đổi
+			}
+		}
+	}
+
+	//
+	private List<FieldDTO> _lstF = new List<FieldDTO>();
+
+
+	protected async override Task OnInitializedAsync()
 	{
 		GenerateCalendars();
+		await LoadFieldType();
 	}
 
 	//Open modal 1
@@ -297,6 +337,18 @@
 	private void CloseModal()
 	{
 		isActiveModal = 0;
+	}
+
+	//Load FieldType
+	private async Task LoadFieldType()
+	{
+		_lstFT = await _svFS.GetAllFieldTypeAsync();
+	}
+
+	//Load Field
+	private async Task LoadField()
+	{
+		_lstF = await _svFS.GetFieldByTypeAsync(_idFT);
 	}
 
 
@@ -350,4 +402,18 @@
 	{
 		return date.Date == selectedDate.Date ? "bg-primary text-white" : string.Empty;
 	}
+
+	private async Task CreateFieldShift()
+	{
+		bool check = await _svFS.CreateFieldshiftAsync(input);
+
+		if (check)
+		{
+			messageString = "Đặt lịch thành công";
+		}
+		else
+		{
+			messageString = "Đặt lịch thất bại";
+		}
 	}
+}
