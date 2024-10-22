@@ -47,17 +47,8 @@ namespace AppAPI.Controllers
         {
             try
             {
-                var entity = new FieldShift
-                {
-                    IdFieldShift = Guid.NewGuid(),
-                    IdShift = fieldshift.IdShift,
-                    Status = fieldshift.Status,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-
-                _fieldshiftRepository.Add(entity);
-                return Ok(new { message = "Thêm sân bóng thành công", entity });
+                _fieldshiftRepository.Add(_mapper.Map<FieldShift>(fieldshift));
+                return Ok(new { message = "Thêm sân bóng thành công", fieldshift });
             }
             catch (DbUpdateException dbEx)
             {

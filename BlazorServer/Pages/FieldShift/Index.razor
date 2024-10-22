@@ -3,6 +3,7 @@
 @using AppData.Entities
 @using BlazorServer.IServices
 @using BlazorServer.Models
+@using AppData.Enum
 
 @inject IFieldService FieldService
 @inject IShiftService ShiftService
@@ -83,9 +84,9 @@
             
                 <div class="form-group">
                     <label>Trạng Thái</label><br />
-                    <input type="radio" id="active" @onclick="() => fieldShift.Status = 1" checked="@((fieldShift.Status == 1))" />
+                    <input type="radio" id="active" @onclick="() => fieldShift.Status = FieldShiftStatus.WaitingForCheckin" checked="@((fieldShift.Status == FieldShiftStatus.WaitingForCheckin))" />
                     <label for="active">Chờ CheckIn</label>
-                    <input type="radio" id="maintenance" @onclick="() => fieldShift.Status = 2" checked="@((fieldShift.Status == 2))" />
+                    <input type="radio" id="maintenance" @onclick="() => fieldShift.Status = FieldShiftStatus.Renting" checked="@((fieldShift.Status == FieldShiftStatus.Renting))" />
                     <label for="maintenance">Đang Thuê</label>
                     <ValidationMessage For="@(() => fieldShift.Status)" />
                 </div>
@@ -156,7 +157,7 @@
                                     <td>@item.ShiftName</td>
                                     <td>@item.StartTime (@item.EndTime)</td>
                                 
-                                    <td>@(item.Status == 1 ? "Bình thường" : "Đang thuê")</td>
+                                    <td>@item.Status</td>
                                     <td>
                                         <button class="btn btn-info" @onclick="() => EditField(item.IdFieldShift)">
                                             <i class="fas fa-edit"></i> Sửa
@@ -166,7 +167,7 @@
                                         </button>
 
                                         <!-- Nút CheckIn chỉ hiện khi Status == 1 -->
-                                        <button class="btn btn-success" @onclick="() => ConfirmCheckIn(item.IdFieldShift)" disabled="@(item.Status != 1)">
+                                        <button class="btn btn-success" @onclick="() => ConfirmCheckIn(item.IdFieldShift)" disabled="@(item.Status != FieldShiftStatus.WaitingForCheckin)">
                                             CheckIn
                                         </button>
                                     </td>
@@ -260,12 +261,12 @@
         var fieldShift = fieldShiftViewModels.FirstOrDefault(f => f.IdFieldShift == idFieldShift);
         if (fieldShift != null)
         {
-            fieldShift.Status = 2;  // Đang thuê
+            fieldShift.Status = FieldShiftStatus.Renting;  // Đang thuê
             await FieldshiftService.UpdateFieldshiftAsync(fieldShift.IdFieldShift, new FieldShiftDTO
                 {
                     IdFieldShift = fieldShift.IdFieldShift,
                     IdShift = fieldShift.IdShift,
-                    Status = 2, // Cập nhật trạng thái là "Đang thuê"
+                    Status = FieldShiftStatus.Renting, // Cập nhật trạng thái là "Đang thuê"
                     CreatedAt = fieldShift.CreatedAt,
                     UpdatedAt = DateTime.Now,
                     CreatedBy = fieldShift.CreatedBy,
@@ -296,7 +297,7 @@
                 IdFieldShift = Guid.NewGuid(),
                 IdShift = fieldShiftVM.IdShift,
                 IdField = fieldShiftVM.IdField,
-                Status = 1,
+                Status = FieldShiftStatus.WaitingForCheckin,
                 CreatedBy = selectedCustomerId.ToString(),  // Gán ID khách hàng đã chọn vào CreatedBy
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now

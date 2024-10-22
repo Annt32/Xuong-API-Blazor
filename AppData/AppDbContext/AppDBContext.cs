@@ -42,7 +42,20 @@ namespace AppData.AppDbContext
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
+			// Cấu hình quan hệ nhiều-nhiều qua bảng trung gian FieldShift
+			modelBuilder.Entity<FieldShift>()
+				.HasKey(fs => fs.IdFieldShift);
+
+			modelBuilder.Entity<FieldShift>()
+				.HasOne(fs => fs.Field)
+				.WithMany(f => f.FieldShifts)
+				.HasForeignKey(fs => fs.IdField);
+
+			modelBuilder.Entity<FieldShift>()
+				.HasOne(fs => fs.Shift)
+				.WithMany(s => s.FieldShifts)
+				.HasForeignKey(fs => fs.IdShift);
+			base.OnModelCreating(modelBuilder);
         }
     }
 }

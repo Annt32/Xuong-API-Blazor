@@ -4,6 +4,7 @@ using AppData.AppDbContext;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,10 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppData.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    partial class AppDBContextModelSnapshot : ModelSnapshot
+    [Migration("20241022043622_UpdateEnumFS")]
+    partial class UpdateEnumFS
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -205,6 +207,9 @@ namespace AppData.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("FieldIdField")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("IdField")
                         .HasColumnType("uniqueidentifier");
 
@@ -225,7 +230,7 @@ namespace AppData.Migrations
 
                     b.HasKey("IdFieldShift");
 
-                    b.HasIndex("IdField");
+                    b.HasIndex("FieldIdField");
 
                     b.HasIndex("IdShift");
 
@@ -716,12 +721,12 @@ namespace AppData.Migrations
                 {
                     b.HasOne("AppData.Entities.Field", "Field")
                         .WithMany("FieldShifts")
-                        .HasForeignKey("IdField")
+                        .HasForeignKey("FieldIdField")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("AppData.Entities.Shift", "Shift")
-                        .WithMany("FieldShifts")
+                        .WithMany()
                         .HasForeignKey("IdShift")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -859,8 +864,6 @@ namespace AppData.Migrations
             modelBuilder.Entity("AppData.Entities.Shift", b =>
                 {
                     b.Navigation("Attendances");
-
-                    b.Navigation("FieldShifts");
                 });
 
             modelBuilder.Entity("AppData.Entities.User", b =>

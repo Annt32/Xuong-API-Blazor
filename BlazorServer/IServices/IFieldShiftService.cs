@@ -1,6 +1,7 @@
 ﻿using AppData.DTO;
 using AppData.DTO.Field_DTO;
-using AppData.DTO.FieldType_DTO; // Sử dụng DTO
+using AppData.DTO.FieldType_DTO;
+using AppData.Entities; // Sử dụng DTO
 
 namespace BlazorServer.IServices
 {
@@ -14,6 +15,7 @@ namespace BlazorServer.IServices
 
         //
         Task<List<FieldTypeDTO>> GetAllFieldTypeAsync();
+        Task<List<Shift>> GetAllShiftAsync();
         Task<List<FieldDTO>> GetFieldByTypeAsync(Guid idtype);
     }
 }

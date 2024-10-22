@@ -3,6 +3,7 @@
 @using AppData.DTO
 @using AppData.DTO.FieldType_DTO
 @using AppData.DTO.Field_DTO
+@using AppData.Entities
 @using BlazorServer.IServices
 @inject IFieldShiftService _svFS;
 
@@ -135,7 +136,7 @@
 						<DataAnnotationsValidator />
 						<div class="mb-3">
 							<label for="" class="form-label">Loại sân</label>
-							<InputSelect @bind-Value="_idFT" class="form-select">
+							<InputSelect @bind-Value="IdFT" class="form-control" TValue="Guid">
 								<option selected value="@Guid.Empty">--Chọn loại sân--</option>
 								@foreach (var item in _lstFT)
 								{
@@ -154,23 +155,24 @@
 								}
 							</InputSelect>
 						</div>
-						@* <div class="mb-3">
-					<label for="" class="form-label">Ca</label>
-					<InputNumber @bind-Value="input.DiscountAmount" class="form-control" />
-					<ValidationMessage For="@(() => inputUpdate.DiscountAmount)" />
-					</div> *@
+						<div class="mb-3">
+							<label for="" class="form-label">Ca</label>
+							<InputSelect @bind-Value="input.IdShift" class="form-control">
+								<option selected value="@Guid.Empty">--Chọn ca--</option>
+								@foreach (var item in _lstS)
+								{
+									<option value="@item.IdShift">@item.ShiftName</option>
+								}
+							</InputSelect>
+						</div>
 						<div class="mb-3">
 							<label for="" class="form-label">Ngày</label>
 							<InputDate @bind-Value="selectedDate" class="form-control" readonly />
 						</div>
-						@* <div class="mb-3">
-					<label for="" class="form-label">Giá</label>
-					<InputDate @bind-Value="input.EndDate" class="form-control" />
-					<ValidationMessage For="@(() => inputUpdate.EndDate)" />
-					</div>
-					<div class="mb-3">
-					<!--Status-->
-					</div> *@
+						<div class="mb-3">
+							<label for="" class="form-label">Giá</label>
+							<InputText @bind-Value="linhtinh" class="form-control" readonly />
+						</div>
 						@if (messageString == "Đặt lịch thành công")
 						{
 							<p class="alert alert-success">@messageString</p>
@@ -289,6 +291,7 @@
 </style>
 
 @code {
+	private string linhtinh = "Tạm thời chưa tính";
 	private int isActiveModal = 0;
 	private DateTime currentMonth = DateTime.Now;
 	private string monthAndYear => currentMonth.ToString("MMMM yyyy", CultureInfo.InvariantCulture);
@@ -298,12 +301,19 @@
 	private List<List<DateTime>> largeCalendar = new List<List<DateTime>>();
 
 	//
+	private List<FieldShiftDTO> _lstFS = new List<FieldShiftDTO>();
 	private FieldShiftDTO input = new FieldShiftDTO();
 	private string messageString = "";
 
 	//
 	private List<FieldTypeDTO> _lstFT = new List<FieldTypeDTO>();
-	private Guid _idFT = Guid.Empty;
+
+	//
+	private List<Shift> _lstS = new List<Shift>();
+
+
+
+	private Guid _idFT;
 	public Guid IdFT
 	{
 		get => _idFT;
@@ -317,7 +327,7 @@
 		}
 	}
 
-	//
+
 	private List<FieldDTO> _lstF = new List<FieldDTO>();
 
 
@@ -325,6 +335,7 @@
 	{
 		GenerateCalendars();
 		await LoadFieldType();
+		await LoadShift();
 	}
 
 	//Open modal 1
@@ -342,15 +353,33 @@
 	//Load FieldType
 	private async Task LoadFieldType()
 	{
-		_lstFT = await _svFS.GetAllFieldTypeAsync();
+		var result = await _svFS.GetAllFieldTypeAsync();
+
+		_lstFT = result.OrderBy(x => x.Name).ToList();
 	}
 
 	//Load Field
 	private async Task LoadField()
 	{
-		_lstF = await _svFS.GetFieldByTypeAsync(_idFT);
+		var result = await _svFS.GetFieldByTypeAsync(_idFT);
+
+		_lstF = result.OrderBy(x => x.FieldName).ToList();
+		StateHasChanged();
 	}
 
+	//Load Shift
+	private async Task LoadShift()
+	{
+		var result = await _svFS.GetAllShiftAsync();
+
+		_lstS = result.OrderBy(x => x.ShiftName).ToList();
+	}
+
+	//Load FieldShift
+	private async Task LoadFieldShift()
+	{
+		_lstFS = await _svFS.GetAllFieldshiftAsync();
+	}
 
 
 	//lich
@@ -405,6 +434,8 @@
 
 	private async Task CreateFieldShift()
 	{
+		input.Status = AppData.Enum.FieldShiftStatus.WaitingForCheckin;
+		input.Time = selectedDate;
 		bool check = await _svFS.CreateFieldshiftAsync(input);
 
 		if (check)

@@ -6,6 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using AppData.Enum;
 
 namespace AppData.DTO
 {
@@ -16,7 +17,7 @@ namespace AppData.DTO
 		public Guid IdShift { get; set; }
         public Guid IdField { get; set; }
         public DateTime Time { get; set; }
-		public int Status { get; set; }
+		public FieldShiftStatus Status { get; set; }
 		public DateTime CreatedAt { get; set; }
 		public DateTime UpdatedAt { get; set; }
 		public string? CreatedBy { get; set; }

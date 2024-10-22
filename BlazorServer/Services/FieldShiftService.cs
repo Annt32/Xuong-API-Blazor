@@ -1,6 +1,7 @@
 ﻿using AppData.DTO; // Sử dụng DTO thay vì thực thể
 using AppData.DTO.Field_DTO;
 using AppData.DTO.FieldType_DTO;
+using AppData.Entities;
 using BlazorServer.IServices;
 using Newtonsoft.Json;
 using System.Net.Http;
@@ -19,10 +20,8 @@ namespace BlazorServer.Services
         // Tạo mới FieldShift bằng DTO
         public async Task<bool> CreateFieldshiftAsync(FieldShiftDTO fieldshift)
         {
-            string requestURL = "https://localhost:7143/api/Fieldshift/fieldshift-post";
-            var jsonContent = JsonConvert.SerializeObject(fieldshift); // Sử dụng DTO để serialize
-            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-            var response = await _httpClient.PostAsync(requestURL, content);
+            string requestURL = "https://localhost:7143/api/FieldShift/fieldshift-post";
+            var response = await _httpClient.PostAsJsonAsync(requestURL, fieldshift);
             return response.IsSuccessStatusCode;
         }
 
@@ -45,6 +44,13 @@ namespace BlazorServer.Services
 		public async Task<List<FieldTypeDTO>> GetAllFieldTypeAsync()
 		{
             var response = await _httpClient.GetFromJsonAsync<List<FieldTypeDTO>>("https://localhost:7143/api/FieldType/get-all");
+
+            return response;
+		}
+
+		public async Task<List<Shift>> GetAllShiftAsync()
+		{
+            var response = await _httpClient.GetFromJsonAsync<List<Shift>>("https://localhost:7143/api/Shift/shifts-get");
 
             return response;
 		}

@@ -1,4 +1,5 @@
 ﻿using AppData.Entities;
+using AppData.Enum;
 
 namespace BlazorServer.Models
 {
@@ -12,7 +13,7 @@ namespace BlazorServer.Models
         public DateTime Time { get; set; } // Thông tin từ Field
         public string StartTime { get; set; } = "00:00:00";
         public string EndTime { get; set; } = "00:00:00";
-        public int Status { get; set; }
+        public FieldShiftStatus Status { get; set; }
         public bool IsCheckedIn { get; set; } // Trạng thái CheckIn (true/false)
 
         // Các thông tin khác từ Shift hoặc Field nếu cần
