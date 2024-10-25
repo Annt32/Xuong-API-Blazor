@@ -1,0 +1,104 @@
+﻿@page "/cancel_delete_invoice"
+@using AppData.Entities
+@using BlazorServer.IServices
+@inject IInvoiceServices services
+@inject NavigationManager navigation
+
+<h3>Cancel Invoice View</h3>
+<p>@_ms</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">IdInvoice</th>
+            <th scope="col">UserId</th>
+            <th scope="col">Status</th>
+            <th scope="col">AdditionalFee</th>
+            <th scope="col">Notes</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in lstinvoice)
+        {
+            <tr>
+                <td scope="row">@item.IdInvoice</td>
+                <td>@item.UserId</td>
+                @if (item.Status == 0)
+                {
+                    <td>Chưa xác nhận</td>
+                }else if(item.Status == 1)
+                {
+                    <td>Đã xác nhận</td>
+                }else if(item.Status == 2)
+                {
+                    <td>Đã hủy xác nhận</td>
+                }
+                <td>@item.AdditionalFee</td>
+                <td>@item.Notes</td>
+                <td>
+                    <button class="btn btn-warning" @onclick="() => CancelInvoice(item.IdInvoice, item.Status)">Hủy lịch đặt sân</button>
+                    <button class="btn btn-warning" @onclick="() => DeleteInvoice(item.IdInvoice, item.Status)">Xóa lịch đặt sân</button>
+                </td>
+            </tr>
+
+        }
+    </tbody>
+</table>
+@code {
+    string _ms = "";
+    List<Invoice> lstinvoice = new List<Invoice>();
+
+    //Hien thi lich dat san
+    protected override async Task OnInitializedAsync()
+    {
+        lstinvoice = await services.GetAllInvoiceAsync();
+    }
+
+
+    //Hủy lịch đặt sân
+    protected async Task CancelInvoice(Guid id, int status)
+    {
+        if (status == 1) //Nếu trạng thái là đã xác nhận
+        {
+            bool iSuccess = await services.CancelInvoiceAsync(id);
+            if (iSuccess)
+            {
+                _ms = "Hủy lịch đặt sân thành công";
+            }
+            else
+            {
+                _ms = "Hủy lịch đặt sân thất bại";
+            }
+
+            //Cập nhật lại danh sách
+            lstinvoice = await services.GetAllInvoiceAsync();
+        }else
+        {
+            _ms = "Chỉ có thể hủy lịch đặt sân có trạng thái là đã xác nhận";
+        }
+    }
+
+
+    //Xoa lịch đặt sân chua xac nhan
+    protected async Task DeleteInvoice(Guid id, int status)
+    {
+        if(status == 0) //Nếu có trạng thái là chưa xác nhận
+        {
+            bool iSuccess = await services.DeleteInvoiceAsync(id);
+            if (iSuccess)
+            {
+                _ms = "Xoa lịch đặt sân thành công";
+            }
+            else
+            {
+                _ms = "Xoa lịch đặt sân thất bại";
+            }
+
+            //Cập nhật lại danh sách
+            lstinvoice = await services.GetAllInvoiceAsync();
+        }else
+        {
+            _ms = "Chỉ có thể xóa lịch đặt sân có trạng thái là chưa xác nhận";
+        }
+    }
+}

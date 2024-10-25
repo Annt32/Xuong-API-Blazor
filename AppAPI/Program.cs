@@ -26,7 +26,11 @@ namespace AppAPI
             builder.Services.AddScoped<IRepository<Field>, Repository<Field>>();
             builder.Services.AddScoped<IRepository<FieldType>, Repository<FieldType>>();
             builder.Services.AddScoped<IRepository<User>, Repository<User>>();
-
+            builder.Services.AddScoped<IRepository<Invoice>, Repository<Invoice>>();
+            builder.Services.AddScoped<IRepository<InvoiceDetail>, Repository<InvoiceDetail>>();
+            builder.Services.AddScoped<IRepository<ServiceField>, Repository<ServiceField>>();
+            builder.Services.AddScoped<IRepository<DrinkDetail>, Repository<DrinkDetail>>();
+            builder.Services.AddScoped<IRepository<RentalEquipmentDetail>, Repository<RentalEquipmentDetail>>();
 
 
             //Auto Mapper
