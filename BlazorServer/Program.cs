@@ -22,6 +22,8 @@ namespace BlazorServer
 
             builder.Services.AddScoped<IFieldService, FieldService>();
             builder.Services.AddScoped<IFieldShiftService, FieldShiftService>();
+            builder.Services.AddScoped<IInvoiceServices, InvoiceService>();
+            builder.Services.AddScoped<IInvoiceDetailService, InvoiceDetailService>();
             builder.Services.AddDbContext<AppDBContext>();
 
             builder.Services.AddScoped(sp => new HttpClient

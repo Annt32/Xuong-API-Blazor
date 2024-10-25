@@ -1,0 +1,52 @@
+﻿@page "/Ind"
+@using AppData.Entities
+@using BlazorServer.IServices
+@inject IInvoiceDetailService services
+@inject NavigationManager navigation
+
+<h3>InvoiceDetailIndex</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th scope="col">IdInvoiceDetail</th>
+            <th scope="col">IdInvoice</th>
+            <th scope="col">IdFieldShift</th>
+            <th scope="col">Deposit</th>
+            <th scope="col">PhoneNumber</th>
+            <th scope="col">Status</th>
+         
+        </tr>
+    </thead>
+    <tbody>   
+        @foreach (var item in invoiceDetails)
+    {
+        <tr>
+            <td scope="row" >@item.IdInvoiceDetail</td>
+                <td>@item.IdInvoice</td>
+                <td>@item.IdFieldShift</td>
+                <td>@item.Deposit</td>
+                <td>@item.Status</td>
+          
+            <td>
+                    <button class="btn btn-warning" @onclick="()=>NavigateToEdit(item.IdInvoiceDetail)">Edit</button>
+
+            </td>
+        </tr>
+
+    }
+    </tbody>
+
+</table>
+@code {
+    List<InvoiceDetail> invoiceDetails = new List<InvoiceDetail>();
+    protected override async Task OnInitializedAsync()
+    {
+        invoiceDetails = await services.GetAllInvoiceDetailAsync();
+    }
+    protected async Task NavigateToEdit(Guid id)
+    {
+        navigation.NavigateTo($"/InvoiceDetail/invoicedetail-put/{id}");
+    }
+}
+

@@ -22,8 +22,10 @@ namespace AppAPI
 
             builder.Services.AddScoped<IRepository<Field>, Repository<Field>>();
             builder.Services.AddScoped<IRepository<FieldShift>, Repository<FieldShift>>();
+            builder.Services.AddScoped<IRepository<Invoice>, Repository<Invoice>>();
+            builder.Services.AddScoped<IRepository<InvoiceDetail>, Repository<InvoiceDetail>>();
 
-            builder.Services.AddAutoMapper(typeof(AutoMapperProfile.AppMapperProfile).Assembly);
+			builder.Services.AddAutoMapper(typeof(AutoMapperProfile.AppMapperProfile).Assembly);
 			var app = builder.Build();
 
             // Configure the HTTP request pipeline.

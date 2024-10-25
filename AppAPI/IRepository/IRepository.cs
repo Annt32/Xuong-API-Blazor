@@ -16,5 +16,7 @@ namespace AppAPI.Repositories
         void Update(T entity);
         void Remove(T entity);
         void RemoveRange(IEnumerable<T> entities); // Xóa nhiều đối tượng
+
+        Task ModifileUpdate(T value);
     }
 }

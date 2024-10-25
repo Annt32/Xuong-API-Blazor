@@ -1,0 +1,34 @@
+﻿@page "/InvoiceDetail/invoicedetail-put/{id:guid}"
+@using AppData.Entities
+@using IServices
+@inject IInvoiceDetailService services
+@inject NavigationManager navigation
+
+<h3>InvoiceDetail</h3>
+<EditForm Model="invoiceDetail" OnValidSubmit="SubmitForm">
+	<DataAnnotationsValidator></DataAnnotationsValidator>
+	<ValidationSummary></ValidationSummary>
+	<div>
+		<label>IdFieldShift</label>
+		<input @bind-value="invoiceDetail.IdFieldShift" />
+	</div>
+	<div>
+		<button type="submit">Edit</button>
+
+	</div>
+
+</EditForm>
+@code {
+	[Parameter]
+	public Guid id { get; set; }
+	InvoiceDetail invoiceDetail = new InvoiceDetail();
+	protected override async Task OnInitializedAsync()
+	{
+		invoiceDetail = await services.GetinvoiceDetailByIdAsync(id);
+	}
+	protected async Task SubmitForm()
+	{
+		await services.UpdateInvoiceDetail(invoiceDetail.IdInvoiceDetail, invoiceDetail);
+		navigation.NavigateTo("/Ind");
+	}
+}

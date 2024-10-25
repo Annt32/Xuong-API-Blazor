@@ -17,6 +17,7 @@ namespace AppAPI.Controllers
 	{
 		private readonly IRepository<FieldShift> _fieldshiftRepository;
 		private readonly IMapper _mapper;
+		public List<DateTime> time;
 
 		public FieldShiftController(IRepository<FieldShift> fieldshiftRepository, IMapper mapper)
 		{
@@ -121,6 +122,31 @@ namespace AppAPI.Controllers
 			{
 				return BadRequest($"{ex.Message}");
 			}
+		}
+
+		public void ListDate()
+		{
+			time = _fieldshiftRepository.GetAll().Select(p=>p.Time).ToList();
+        }
+		[HttpPost]
+		public async Task<IActionResult> CheckDate(DateTime check)
+		{
+			 var a = _fieldshiftRepository.GetAll().FirstOrDefault(x => x.Time.Date == check.Date);
+			
+				for (int i = 0; i < 32; i++)
+				{
+				if (!time.Contains(check.AddDays(i)))
+				{
+
+					FieldShift fieldShift = new FieldShift();
+					fieldShift.Time = check.AddDays(i);
+					_fieldshiftRepository.Add(fieldShift);
+				}
+				break;
+				}
+				return Ok();
+			
+			
 		}
 	}
 }

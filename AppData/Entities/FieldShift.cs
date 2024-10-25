@@ -18,6 +18,7 @@ namespace AppData.Entities
 
         //[ForeignKey("FieldDetail")]
         //public Guid IdFieldDetail { get; set; }
+        
 
         public DateTime Time { get; set; }
         public int Status { get; set; }
