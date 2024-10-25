@@ -1,105 +1,230 @@
 ﻿using AppAPI.Repositories;
-using AppData.DTO;
+using AppData.DTO.User_RoleDto;
 using AppData.Entities;
 using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace AppAPI.Controllers
 {
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IRepository<User> _userRepository;
+        private readonly UserManager<User> _userManager;
         private readonly IMapper _mapper;
 
-        public UserController(IRepository<User> userRepository, IMapper mapper)
+
+
+        public UserController( UserManager<User> userManager = null, IMapper mapper = null)
         {
-            _userRepository = userRepository;
+            _userManager = userManager;
             _mapper = mapper;
         }
 
-        // GET: api/user
-        [HttpGet("get-all")]
-        public IActionResult GetAllUsers()
+
+
+        [HttpGet]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<WebUser>))]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public ActionResult<List<WebUser>> Get()
         {
-            var entity = _userRepository.GetAll();
-            var dto = _mapper.Map<IEnumerable<WebUser>>(entity);
-            return Ok(dto);
+            return Ok(_userManager.Users);
+            //return Ok(/*_reviewRepo.Users*/_dbContext.Users.ToList());
         }
 
-        // GET api/user/get-by-id/{id}
-        [HttpGet("get-by-id/{id}")]
-        public IActionResult GetUserById(Guid id)
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(WebUser))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<WebUser>> Get(string id)
         {
-            var entity = _userRepository.GetById(id);
-            if (entity != null)
+            var result = await _userManager.FindByIdAsync(id);
+            var dto = _mapper.Map<User>(result);
+            if (id == null)
             {
-                var dto = _mapper.Map<WebUser>(entity);
+                return NotFound();
+            }
+            else
                 return Ok(dto);
-            }
-            return NotFound();
         }
-
-        // POST api/user/create
-        [HttpPost("create")]
-        public IActionResult CreateUser([FromBody] WebUser value)
+        [HttpPost]
+        [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(string))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> Create([FromBody] WebUser value, string roleName, string UserNow)
         {
-            try
-            {
-                value.UserId = Guid.NewGuid();
-                value.CreatedAt = DateTime.UtcNow;
-                value.UpdatedAt = DateTime.UtcNow;
 
-                var mappedResult = _mapper.Map<User>(value);
-                _userRepository.Add(mappedResult);
-                return Ok(new { message = "Thêm người dùng thành công", value });
-            }
-            catch (Exception ex)
+
+
+            User user = new User()
             {
-                return BadRequest(new { message = ex.Message });
+                UserName = value.UserName,
+                Email = value.Email,
+                FullName = value.FullName,
+                Address = value.Address,
+                Status = value.Status,
+                PhoneNumber = value.PhoneNumber,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = UserNow
+            };
+            IdentityResult result = await _userManager.CreateAsync(user, value.Password);
+
+            if (result.Succeeded)
+            {
+                if (roleName == "Admin")
+                {
+                    _userManager.AddToRoleAsync(user, "Staff");
+                    _userManager.AddToRoleAsync(user, "Customer");
+                    IdentityResult resultRole = await _userManager.AddToRoleAsync(user, roleName);
+
+                    if (resultRole.Succeeded)
+                        return CreatedAtAction(nameof(Get), new { id = user.Id }, user.Id);
+                    else return StatusCode(StatusCodes.Status500InternalServerError, $"Chưa tạo thành công userRole:{string.Join(" ", resultRole.Errors.Select(e => e.Description))}");
+                }
+                else if (roleName == "Staff")
+                {
+                    _userManager.AddToRoleAsync(user, "Customer");
+                    IdentityResult resultRole = await _userManager.AddToRoleAsync(user, roleName);
+
+                    if (resultRole.Succeeded)
+                        return CreatedAtAction(nameof(Get), new { id = user.Id }, user.Id);
+                    else return StatusCode(StatusCodes.Status500InternalServerError, $"Chưa tạo thành công userRole:{string.Join(" ", resultRole.Errors.Select(e => e.Description))}");
+                }
+                else
+                {
+                    IdentityResult resultRole = await _userManager.AddToRoleAsync(user, roleName);
+
+                    if (resultRole.Succeeded)
+                        return CreatedAtAction(nameof(Get), new { id = user.Id }, user.Id);
+                    else return StatusCode(StatusCodes.Status500InternalServerError, $"Chưa tạo thành công userRole:{string.Join(" ", resultRole.Errors.Select(e => e.Description))}");
+
+                }
+
+
+
+            }
+            else return StatusCode(StatusCodes.Status500InternalServerError, $"Chưa tạo thành công user:{string.Join(" ", result.Errors.Select(e => e.Description))}");
+
+
+
+        }
+        [HttpPut]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> Edit([FromBody] WebUser value, string roleName)
+        {
+            var passwordHasher = new PasswordHasher<User>();
+            var user1 = await _userManager.FindByNameAsync(value.UserName);
+            if (user1 == null) { return NotFound(); }
+            else
+            {
+                var id = user1.Id;
+                user1.UserName = value.UserName;
+                user1.PasswordHash = passwordHasher.HashPassword(user1, value.Password);
+                user1.Email = value.Email;
+                user1.PhoneNumber = value.PhoneNumber;
+                user1.FullName = value.FullName;
+                user1.Address = value.Address;
+                user1.Status = value.Status;
+                user1.UpdatedAt = DateTime.UtcNow;
+                user1.UpdatedBy = "";
+                var result = await _userManager.UpdateAsync(user1);
+                IdentityResult addRoleResultStaff;
+                IdentityResult addRoleResultAdmin;
+                IdentityResult removeRoleResultAdmin;
+                IdentityResult removeRoleResultStaff;
+                if (!await _userManager.IsInRoleAsync(user1, roleName))
+                {
+                    if (roleName == "Admin")
+                    {
+                        addRoleResultStaff = await _userManager.AddToRoleAsync(user1, "Staff");
+                        addRoleResultAdmin = await _userManager.AddToRoleAsync(user1, "Admin");
+                        if (result.Succeeded)
+                        {
+                            if (addRoleResultAdmin.Succeeded)
+                            {
+                                if (addRoleResultStaff.Succeeded)
+                                {
+                                    return Ok("Sửa thành công admin nhưng chưa thành công thêm staff");
+                                }
+
+                                return Ok("Sửa thành công Admin");
+
+                            }
+                            else return StatusCode(StatusCodes.Status500InternalServerError, $"Chưa sửa thành công userRole:{string.Join(" ", addRoleResultAdmin.Errors.Select(e => e.Description))}");
+                        }
+                        else return StatusCode(StatusCodes.Status500InternalServerError, $"Chưa sửa thành công user:{string.Join(" ", result.Errors.Select(e => e.Description))}");
+
+                    }
+                    else if (roleName == "Staff")
+                    {
+                        removeRoleResultAdmin = await _userManager.RemoveFromRoleAsync(user1, "Admin");
+                        addRoleResultStaff = await _userManager.AddToRoleAsync(user1, "Staff");
+                        if (result.Succeeded)
+                        {
+                            if (addRoleResultStaff.Succeeded)
+                            {
+                                if (removeRoleResultAdmin.Succeeded)
+                                {
+                                    return Ok("Đã Xóa Khỏi Admin");
+                                }
+                                return Ok("Sửa thành công Staff, nhưng chưa xóa khỏi admin(nếu có)");
+                            }
+                            else return StatusCode(StatusCodes.Status500InternalServerError, $"Chưa sửa thành công userRole:{string.Join(" ", addRoleResultStaff.Errors.Select(e => e.Description))}");
+                        }
+                        else return StatusCode(StatusCodes.Status500InternalServerError, $"Chưa Sửa thành công user:{string.Join(" ", result.Errors.Select(e => e.Description))}");
+
+                    }
+                    else
+                    {
+                        removeRoleResultAdmin = await _userManager.RemoveFromRoleAsync(user1, "Admin");
+                        removeRoleResultStaff = await _userManager.RemoveFromRoleAsync(user1, "Staff");
+                        if (result.Succeeded)
+                        {
+                            if (removeRoleResultStaff.Succeeded)
+                            {
+                                if (removeRoleResultAdmin.Succeeded)
+                                {
+                                    return Ok("Đã Sửa thành Customer");
+                                }
+                                return Ok("Sửa thành Staff, nhưng chưa xóa khỏi Admin(Nếu có)");
+                            }
+                            else return StatusCode(StatusCodes.Status500InternalServerError, $"Chưa sửa thành công userRole:{string.Join(" ", removeRoleResultStaff.Errors.Select(e => e.Description))}");
+                        }
+                        else return StatusCode(StatusCodes.Status500InternalServerError, $"Chưa Sửa thành công user:{string.Join(" ", result.Errors.Select(e => e.Description))}");
+
+                    }
+                }
+                return Ok("Sửa thành công");
+
             }
         }
-
-        // PUT api/user/update/{id}
-        [HttpPut("update/{id}")]
-        public IActionResult UpdateUser(Guid id, [FromBody] WebUser value)
+        [HttpDelete]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult> Delete(string id)
         {
-            // Lấy thông tin người dùng từ repository dựa trên id
-            var entity = _userRepository.GetById(id);
-            if (entity == null)
+            var user = await _userManager.FindByIdAsync(id);
+
+            if (user == null) { return NotFound(); }
+            else
             {
-                return NotFound("Người dùng không tìm thấy");
+                var result = await _userManager.DeleteAsync(user);
+                if (result.Succeeded)
+                {
+                    return Ok("Xóa thành công");
+                }
+                return BadRequest("Xóa thất bại");
             }
 
-            // Giữ nguyên UserId và cập nhật lại các thông tin khác từ value
-            entity.FullName = value.FullName;
-            entity.Email = value.Email; 
-            entity.PhoneNumber = value.PhoneNumber;
-            entity.Address = value.Address; 
-            entity.Password = value.Password; 
-            entity.Status = value.Status; 
-            entity.UpdatedAt = DateTime.UtcNow;
-                                               
-
-            _userRepository.ModifileUpdate(entity);
-
-            return Ok(new { message = "Cập nhật người dùng thành công", value = entity });
-        }
-
-
-        // DELETE api/user/delete/{id}
-        [HttpDelete("delete/{id}")]
-        public IActionResult DeleteUser(Guid id)
-        {
-            var user = _userRepository.GetById(id);
-            if (user == null)
-            {
-                return NotFound("Người dùng không tìm thấy");
-            }
-
-            _userRepository.Remove(user);
-            return Ok(new { message = "Xóa người dùng thành công" });
         }
     }
 }

@@ -1,0 +1,58 @@
+﻿@page "/login"
+@using BlazorServer.IServices
+@using BlazorServer.Models
+@using AppData.Authentication;
+@inject IAuthenticationService AutenticationService;
+
+<h3>Login</h3>
+
+<fieldset disabled="@(expiration is not null)">
+    <EditForm Model="@model" OnValidSubmit="SubmitAsync">
+        <div>
+            <label for="username">Username:</label>
+            <InputText  id="username" name="username" required />
+        </div>
+        <div>
+            <label for="username">Password:</label>
+            <InputText typeof="password" id="password" name="password" required />
+        </div>
+        <div>
+            <button type="submit">Login</button>
+        </div>
+    </EditForm>
+</fieldset>
+
+@if (expiration is not null)
+{
+    <p>đăng nhập hết hạn sau @expiration?.ToLongTimeString()</p>
+}
+
+@if (errorMessage is not null)
+{
+    <p class="error">@errorMessage </p>
+}
+{
+    
+}
+
+@code {
+    private LoginModel model = new LoginModel();
+    private DateTime? expiration;
+    private string errorMessage;
+
+    private async Task SubmitAsync()
+    {
+        try
+        {
+            expiration = await AutenticationService.LoginAsync(model);
+
+            errorMessage = null;
+        }
+        catch (Exception ex)
+        {
+            expiration = null;
+
+            errorMessage = ex.Message;
+        }
+    }
+}
