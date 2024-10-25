@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AppData.Migrations
 {
     [DbContext(typeof(AppDBContext))]
-    [Migration("20241022043622_UpdateEnumFS")]
-    partial class UpdateEnumFS
+    [Migration("20241025074101_app")]
+    partial class app
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -207,9 +207,6 @@ namespace AppData.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid>("FieldIdField")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("IdField")
                         .HasColumnType("uniqueidentifier");
 
@@ -230,7 +227,7 @@ namespace AppData.Migrations
 
                     b.HasKey("IdFieldShift");
 
-                    b.HasIndex("FieldIdField");
+                    b.HasIndex("IdField");
 
                     b.HasIndex("IdShift");
 
@@ -721,12 +718,12 @@ namespace AppData.Migrations
                 {
                     b.HasOne("AppData.Entities.Field", "Field")
                         .WithMany("FieldShifts")
-                        .HasForeignKey("FieldIdField")
+                        .HasForeignKey("IdField")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("AppData.Entities.Shift", "Shift")
-                        .WithMany()
+                        .WithMany("FieldShifts")
                         .HasForeignKey("IdShift")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -864,6 +861,8 @@ namespace AppData.Migrations
             modelBuilder.Entity("AppData.Entities.Shift", b =>
                 {
                     b.Navigation("Attendances");
+
+                    b.Navigation("FieldShifts");
                 });
 
             modelBuilder.Entity("AppData.Entities.User", b =>

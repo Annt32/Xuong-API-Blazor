@@ -25,8 +25,8 @@ namespace AppData.Entities
         // Navigation properties
         [JsonIgnore]
         public ICollection<Attendance> Attendances { get; set; } = new List<Attendance>();
-
-        public ICollection<FieldShift> FieldShifts { get; set; }
+        [JsonIgnore]
+        public ICollection<FieldShift> FieldShifts { get; set; } = new List<FieldShift>();
     }
 
 }

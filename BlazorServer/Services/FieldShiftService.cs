@@ -21,9 +21,26 @@ namespace BlazorServer.Services
         public async Task<bool> CreateFieldshiftAsync(FieldShiftDTO fieldshift)
         {
             string requestURL = "https://localhost:7143/api/FieldShift/fieldshift-post";
+
+            // Gửi request tới API
             var response = await _httpClient.PostAsJsonAsync(requestURL, fieldshift);
+
+            // Kiểm tra nếu request không thành công
+            if (!response.IsSuccessStatusCode)
+            {
+                // Đọc nội dung phản hồi từ API
+                var errorContent = await response.Content.ReadAsStringAsync();
+
+                // Log hoặc hiển thị lỗi từ API (tùy thuộc vào cách bạn xử lý log)
+                Console.WriteLine($"Error: {response.StatusCode}, Message: {errorContent}");
+
+                // Bạn cũng có thể tùy chọn throw exception nếu cần
+                throw new Exception($"Request failed with status code: {response.StatusCode}. Details: {errorContent}");
+            }
+
             return response.IsSuccessStatusCode;
         }
+
 
         // Xóa FieldShift theo ID
         public async Task<bool> DeleteFieldshiftAsync(Guid id)

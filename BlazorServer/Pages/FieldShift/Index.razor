@@ -42,7 +42,7 @@
                 <!-- Dropdown chọn sân bóng -->
                 <div class="form-group">
                     <label for="FieldShift">Chọn Sân</label>
-                    <select id="FieldShift" class="form-control" @bind="fieldShift.IdField">
+                    <select id="FieldShift" class="form-control" @bind="fieldShiftVM.IdField">
                         <option value="">-- Chọn Sân --</option>
                         @foreach (var field in fieldShifts)
                         {
@@ -54,7 +54,7 @@
                 <!-- Dropdown chọn ca -->
                 <div class="form-group">
                     <label for="Shift">Chọn Ca</label>
-                    <select id="Shift" class="form-control" @bind="fieldShift.IdShift">
+                    <select id="Shift" class="form-control" @bind="fieldShiftVM.IdShift">
                         <option value="">-- Chọn Ca --</option>
                         @foreach (var shift in shifts)
                         {
@@ -62,6 +62,7 @@
                         }
                     </select>
                 </div>
+
 
                 <!-- Phần chọn ngày -->
                 <div class="form-group">
@@ -185,10 +186,10 @@
 @code {
     private List<FieldShiftViewModel> fieldShiftViewModels = new List<FieldShiftViewModel>();
     private FieldShiftViewModel fieldShiftVM = new FieldShiftViewModel();
-    private FieldShiftViewModel fieldShift = new FieldShiftViewModel(); // Sử dụng ViewModel
+    private FieldShiftViewModel fieldShift = new FieldShiftViewModel();
     private List<WebUser> customers = new List<WebUser>();
-    private List<FieldViewModel> fieldShifts = new List<FieldViewModel>(); // Danh sách sân bóng
-    private List<ShiftViewModel> shifts = new List<ShiftViewModel>(); // Danh sách ca
+    private List<FieldViewModel> fieldShifts = new List<FieldViewModel>(); 
+    private List<ShiftViewModel> shifts = new List<ShiftViewModel>(); 
 
     private Guid selectedCustomerId;  // Lưu ID khách hàng đã chọn
 
@@ -201,8 +202,8 @@
         var allFieldshifts = await FieldshiftService.GetAllFieldshiftAsync();
 
         customers = await UserService.GetAllFieldsAsync();
-        fieldShifts = await FieldService.GetAllFieldsAsync();  // Lấy tất cả sân bóng
-        shifts = await ShiftService.GetAllShiftsAsync();  // Lấy tất cả ca làm việc
+        fieldShifts = await FieldService.GetAllFieldsAsync();  
+        shifts = await ShiftService.GetAllShiftsAsync();  
 
 
         fieldShiftViewModels = (await Task.WhenAll(allFieldshifts.Select(async f =>
@@ -217,11 +218,11 @@
                 {
                     IdFieldShift = f.IdFieldShift,
                     IdShift = f.IdShift,
-                    ShiftName = shift?.ShiftName ?? "Unknown",  // Lấy tên của Shift
-                    FieldName = field?.FieldName ?? "Unknown",  // Lấy tên của Field
+                    ShiftName = shift?.ShiftName ?? "Unknown",  
+                    FieldName = field?.FieldName ?? "Unknown", 
                     Time = f.Time,
-                    StartTime = shift?.StartTime ?? "Zero",     // Lấy StartTime từ Shift
-                    EndTime = shift?.EndTime ?? "Zero",         // Lấy EndTime từ Shift
+                    StartTime = shift?.StartTime ?? "Zero",     
+                    EndTime = shift?.EndTime ?? "Zero",        
                     Status = f.Status,
                     CreatedAt = f.CreatedAt,
                     UpdatedAt = f.UpdatedAt,
@@ -237,7 +238,6 @@
 
 
 
-    // Giả sử bạn có các service để lấy tên Shift và Field
     private async Task<string> GetShiftName(Guid idShift)
     {
         var shift = await ShiftService.GetShiftByIdAsync(idShift);
@@ -266,7 +266,7 @@
                 {
                     IdFieldShift = fieldShift.IdFieldShift,
                     IdShift = fieldShift.IdShift,
-                    Status = FieldShiftStatus.Renting, // Cập nhật trạng thái là "Đang thuê"
+                    Status = FieldShiftStatus.Renting,
                     CreatedAt = fieldShift.CreatedAt,
                     UpdatedAt = DateTime.Now,
                     CreatedBy = fieldShift.CreatedBy,
@@ -295,10 +295,10 @@
         var newFieldShift = new FieldShiftDTO
             {
                 IdFieldShift = Guid.NewGuid(),
-                IdShift = fieldShiftVM.IdShift,
-                IdField = fieldShiftVM.IdField,
+                IdShift = fieldShiftVM.IdShift, 
+                IdField = fieldShiftVM.IdField, 
                 Status = FieldShiftStatus.WaitingForCheckin,
-                CreatedBy = selectedCustomerId.ToString(),  // Gán ID khách hàng đã chọn vào CreatedBy
+                CreatedBy = selectedCustomerId.ToString(),
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now
             };
@@ -307,13 +307,14 @@
 
         if (result)
         {
-            // Logic khi tạo mới thành công
+            Console.WriteLine("Thêm thành công");
         }
         else
         {
-            // Xử lý lỗi
+            errorMessage = "Có lỗi xảy ra.";
         }
     }
+
 
 
 

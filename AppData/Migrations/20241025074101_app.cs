@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace AppData.Migrations
 {
-    public partial class CrDB : Migration
+    public partial class app : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -272,15 +272,14 @@ namespace AppData.Migrations
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    FieldIdField = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_FieldShifts", x => x.IdFieldShift);
                     table.ForeignKey(
-                        name: "FK_FieldShifts_Fields_FieldIdField",
-                        column: x => x.FieldIdField,
+                        name: "FK_FieldShifts_Fields_IdField",
+                        column: x => x.IdField,
                         principalTable: "Fields",
                         principalColumn: "IdField",
                         onDelete: ReferentialAction.Cascade);
@@ -437,9 +436,9 @@ namespace AppData.Migrations
                 column: "FieldTypeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FieldShifts_FieldIdField",
+                name: "IX_FieldShifts_IdField",
                 table: "FieldShifts",
-                column: "FieldIdField");
+                column: "IdField");
 
             migrationBuilder.CreateIndex(
                 name: "IX_FieldShifts_IdShift",
