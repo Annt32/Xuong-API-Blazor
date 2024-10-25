@@ -24,6 +24,7 @@ namespace AppAPI
             builder.Services.AddSwaggerGen();
 
             builder.Services.AddScoped<IRepository<Field>, Repository<Field>>();
+            builder.Services.AddScoped<IRepository<Shift>, Repository<Shift>>();
             builder.Services.AddScoped<IRepository<FieldType>, Repository<FieldType>>();
             builder.Services.AddScoped<IRepository<User>, Repository<User>>();
             builder.Services.AddScoped<IRepository<Invoice>, Repository<Invoice>>();
