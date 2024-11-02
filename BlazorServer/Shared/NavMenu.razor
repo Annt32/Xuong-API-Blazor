@@ -24,14 +24,42 @@
                 <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
             </NavLink>
         </div>
-        <div class ="nav-item px-3">
-            <NavLink class="nav-link" href="/fields">
-                <span class="ooi oi-list-rich" aria-hidden="true"></span> Fields
-            </NavLink>
-        </div>
+
+        <!-- Mục Fields với danh sách con có thể ẩn/hiện -->
         <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/FieldShifts">
-                <span class="ooi oi-list-rich" aria-hidden="true"></span> FieldShift
+            <a class="nav-link" href="#" @onclick="ToggleFieldsMenu">
+                <span class="oi oi-folder" aria-hidden="true"></span> Fields
+            </a>
+            @if (showFieldsMenu)
+            {
+                <ul class="list-unstyled ps-3">
+                    <li class="nav-item px-3">
+                        <NavLink class="nav-link" href="/fields">
+                            <span class="oi oi-list-rich" aria-hidden="true"></span> Fields List
+                        </NavLink>
+                    </li>
+                    <li class="nav-item px-3">
+                        <NavLink class="nav-link" href="/fieldtypes">
+                            <span class="oi oi-list" aria-hidden="true"></span> FieldType
+                        </NavLink>
+                    </li>
+                    <li class="nav-item px-3">
+                        <NavLink class="nav-link" href="/FieldShifts">
+                            <span class="oi oi-clock" aria-hidden="true"></span> FieldShift
+                        </NavLink>
+                    </li>
+                    <li class="nav-item px-3">
+                        <NavLink class="nav-link" href="/dat-lich">
+                            <span class="oi oi-clock" aria-hidden="true"></span> FieldShift
+                        </NavLink>
+                    </li>
+                </ul>
+            }
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="/user">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> User
             </NavLink>
         </div>
     </nav>
@@ -39,11 +67,17 @@
 
 @code {
     private bool collapseNavMenu = true;
+    private bool showFieldsMenu = false; // Trạng thái hiển thị của menu Fields con
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
     private void ToggleNavMenu()
     {
         collapseNavMenu = !collapseNavMenu;
+    }
+
+    private void ToggleFieldsMenu()
+    {
+        showFieldsMenu = !showFieldsMenu; // Chuyển đổi trạng thái hiển thị của menu Fields
     }
 }

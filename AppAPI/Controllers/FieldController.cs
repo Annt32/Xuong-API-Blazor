@@ -68,6 +68,7 @@ namespace AppAPI.Controllers
             }
 
             field.FieldName = fieldUpdate.FieldName;
+            field.Location = fieldUpdate.Location;
             field.FieldTypeId = fieldUpdate.FieldTypeId;
             field.Status = fieldUpdate.Status;
             field.UpdatedAt = DateTime.UtcNow;

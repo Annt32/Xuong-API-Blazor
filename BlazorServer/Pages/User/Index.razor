@@ -61,7 +61,7 @@
 
                 <!-- Nút Tạo và Cập Nhật -->
                 <div class="form-group">
-                    @if (User.UserId == Guid.Empty)
+                    @if (User.Id == Guid.Empty)
                     {
                         <button type="submit" class="btn btn-primary">Tạo</button>
                     }
@@ -128,10 +128,10 @@
                                     <td>@user.Address</td>
                                     <td>@(user.Status == 1 ? "Bình thường" : "Khóa")</td>
                                     <td>
-                                        <button class="btn btn-info" @onclick="() => EditField(user.UserId)">
+                                        <button class="btn btn-info" @onclick="() => EditField(user.Id)">
                                             <i class="fas fa-edit"></i> Sửa
                                         </button>
-                                        <button class="btn btn-danger" @onclick="() => ConfirmDelete(user.UserId)">
+                                        <button class="btn btn-danger" @onclick="() => ConfirmDelete(user.Id)">
                                             <i class="fas fa-trash-alt"></i> Xóa
                                         </button>
                                     </td>
@@ -160,7 +160,7 @@
 
     private async Task HandleSubmit()
     {
-        if (User.UserId == Guid.Empty)
+        if (User.Id == Guid.Empty)
         {
             await CreateField();
         }
@@ -196,7 +196,7 @@
     {
         try
         {
-            bool success = await UserService.UpdateFieldAsync(User.UserId, User);
+            bool success = await UserService.UpdateFieldAsync(User.Id, User);
             if (success)
             {
                 Users = await UserService.GetAllFieldsAsync();
@@ -216,12 +216,12 @@
 
     private void EditField(Guid id)
     {
-        var UserToEdit = Users.FirstOrDefault(f => f.UserId == id);
+        var UserToEdit = Users.FirstOrDefault(f => f.Id == id);
         if (UserToEdit != null)
         {
             User = new WebUser
                 {
-                    UserId = UserToEdit.UserId,
+                    Id = UserToEdit.Id,
                     FullName = UserToEdit.FullName,
                     Email = UserToEdit.Email,
                     PhoneNumber = UserToEdit.PhoneNumber,

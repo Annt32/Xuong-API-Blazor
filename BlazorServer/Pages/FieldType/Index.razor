@@ -140,6 +140,21 @@
     {
         try
         {
+            // Kiểm tra giá trị của Price
+            if (fieldType.Price < 1000 || fieldType.Price > 100000000) 
+            {
+                errorMessage = "Giá phải từ 1000 đến 100 triệu!";
+                return;
+            }
+
+            // Kiểm tra trùng tên loại sân
+            var existingFieldType = fieldTypes.FirstOrDefault(ft => ft.Name.Equals(fieldType.Name, StringComparison.OrdinalIgnoreCase));
+            if (existingFieldType != null)
+            {
+                errorMessage = "Loại sân đã tồn tại, vui lòng chọn tên khác.";
+                return;
+            }
+
             bool success = await FieldTypeService.CreateFieldAsync(new AppData.Entities.FieldType
                 {
                     Id = Guid.NewGuid(),
@@ -147,7 +162,6 @@
                     Price = fieldType.Price,
                     Description = fieldType.Description
                 });
-
 
             if (success)
             {
@@ -170,6 +184,21 @@
     {
         try
         {
+            // Kiểm tra giá trị của Price
+            if (fieldType.Price < 1000 || fieldType.Price > 100000000) 
+            {
+                errorMessage = "Giá phải từ 1000 đến 100 triệu!";
+                return;
+            }
+
+            // Kiểm tra trùng tên loại sân (loại trừ trường hợp đang chỉnh sửa chính nó)
+            var existingFieldType = fieldTypes.FirstOrDefault(ft => ft.Name.Equals(fieldType.Name, StringComparison.OrdinalIgnoreCase) && ft.Id != fieldType.Id);
+            if (existingFieldType != null)
+            {
+                errorMessage = "Tên loại sân đã tồn tại, vui lòng chọn tên khác.";
+                return;
+            }
+
             bool success = await FieldTypeService.UpdateFieldAsync(fieldType.Id, new AppData.Entities.FieldType
                 {
                     Id = fieldType.Id,

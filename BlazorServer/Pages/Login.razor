@@ -10,11 +10,11 @@
     <EditForm Model="@model" OnValidSubmit="SubmitAsync">
         <div>
             <label for="username">Username:</label>
-            <InputText  id="username" name="username" required />
+            <InputText id="username" @bind-Value="model.Username" required />
         </div>
         <div>
-            <label for="username">Password:</label>
-            <InputText typeof="password" id="password" name="password" required />
+            <label for="password">Password:</label>
+            <InputText id="password" @bind-Value="model.Password" type="password" required />
         </div>
         <div>
             <button type="submit">Login</button>
@@ -30,9 +30,6 @@
 @if (errorMessage is not null)
 {
     <p class="error">@errorMessage </p>
-}
-{
-    
 }
 
 @code {

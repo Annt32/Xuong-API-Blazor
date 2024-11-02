@@ -26,7 +26,7 @@ namespace AppAPI.Controllers
 
 
 
-        [HttpGet]
+        [HttpGet("get-all")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<WebUser>))]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public ActionResult<List<WebUser>> Get()
@@ -35,7 +35,7 @@ namespace AppAPI.Controllers
             //return Ok(/*_reviewRepo.Users*/_dbContext.Users.ToList());
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("get-by-id/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(WebUser))]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -50,7 +50,7 @@ namespace AppAPI.Controllers
             else
                 return Ok(dto);
         }
-        [HttpPost]
+        [HttpPost("create")]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(string))]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
@@ -77,22 +77,24 @@ namespace AppAPI.Controllers
             {
                 if (roleName == "Admin")
                 {
-                    _userManager.AddToRoleAsync(user, "Staff");
-                    _userManager.AddToRoleAsync(user, "Customer");
+                    await _userManager.AddToRoleAsync(user, "Staff"); // Thêm await ở đây
+                    await _userManager.AddToRoleAsync(user, "Customer"); // Thêm await ở đây
                     IdentityResult resultRole = await _userManager.AddToRoleAsync(user, roleName);
 
                     if (resultRole.Succeeded)
                         return CreatedAtAction(nameof(Get), new { id = user.Id }, user.Id);
-                    else return StatusCode(StatusCodes.Status500InternalServerError, $"Chưa tạo thành công userRole:{string.Join(" ", resultRole.Errors.Select(e => e.Description))}");
+                    else
+                        return StatusCode(StatusCodes.Status500InternalServerError, $"Chưa tạo thành công userRole:{string.Join(" ", resultRole.Errors.Select(e => e.Description))}");
                 }
                 else if (roleName == "Staff")
                 {
-                    _userManager.AddToRoleAsync(user, "Customer");
+                    await _userManager.AddToRoleAsync(user, "Customer"); // Thêm await ở đây
                     IdentityResult resultRole = await _userManager.AddToRoleAsync(user, roleName);
 
                     if (resultRole.Succeeded)
                         return CreatedAtAction(nameof(Get), new { id = user.Id }, user.Id);
-                    else return StatusCode(StatusCodes.Status500InternalServerError, $"Chưa tạo thành công userRole:{string.Join(" ", resultRole.Errors.Select(e => e.Description))}");
+                    else
+                        return StatusCode(StatusCodes.Status500InternalServerError, $"Chưa tạo thành công userRole:{string.Join(" ", resultRole.Errors.Select(e => e.Description))}");
                 }
                 else
                 {
@@ -100,19 +102,18 @@ namespace AppAPI.Controllers
 
                     if (resultRole.Succeeded)
                         return CreatedAtAction(nameof(Get), new { id = user.Id }, user.Id);
-                    else return StatusCode(StatusCodes.Status500InternalServerError, $"Chưa tạo thành công userRole:{string.Join(" ", resultRole.Errors.Select(e => e.Description))}");
-
+                    else
+                        return StatusCode(StatusCodes.Status500InternalServerError, $"Chưa tạo thành công userRole:{string.Join(" ", resultRole.Errors.Select(e => e.Description))}");
                 }
-
-
-
             }
-            else return StatusCode(StatusCodes.Status500InternalServerError, $"Chưa tạo thành công user:{string.Join(" ", result.Errors.Select(e => e.Description))}");
+            else
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Chưa tạo thành công user:{string.Join(" ", result.Errors.Select(e => e.Description))}");
+
 
 
 
         }
-        [HttpPut]
+        [HttpPut("update")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -206,7 +207,7 @@ namespace AppAPI.Controllers
 
             }
         }
-        [HttpDelete]
+        [HttpDelete("delete/{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]

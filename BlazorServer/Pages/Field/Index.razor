@@ -100,6 +100,7 @@
                         <tr>
                             <th>STT</th>
                             <th>Tên</th>
+                            <th>Địa điểm</th>
                             <th>Loại sân</th>
                             <th>Giá</th>
                             <th>Trạng Thái</th>
@@ -110,13 +111,13 @@
                         @if (fields == null)
                         {
                             <tr>
-                                <td colspan="6" class="text-center">Đang tải dữ liệu...</td>
+                                <td colspan="7" class="text-center">Đang tải dữ liệu...</td>
                             </tr>
                         }
                         else if (!fields.Any())
                         {
                             <tr>
-                                <td colspan="6" class="text-center">Không có sân bóng nào để hiển thị.</td>
+                                <td colspan="7" class="text-center">Không có sân bóng nào để hiển thị.</td>
                             </tr>
                         }
                         else
@@ -127,6 +128,7 @@
                                 <tr>
                                     <td>@(++index)</td>
                                     <td>@field.FieldName</td>
+                                    <td>@field.Location</td>
                                     <td>@field.FieldTypeName</td>
                                     <td>@field.FieldTypePrice.ToString("C")</td>
                                     <td>@(field.Status == 1 ? "Bình thường" : "Sửa chữa")</td>
@@ -203,7 +205,15 @@
     private async Task CreateField()
     {
         try
-        {
+        {          
+
+            var existingField = fields.FirstOrDefault(f => f.FieldName.Equals(field.FieldName, StringComparison.OrdinalIgnoreCase));
+            if (existingField != null)
+            {
+                errorMessage = "Tên sân bóng đã tồn tại, vui lòng chọn tên khác.";
+                return;
+            }
+
             field.FieldTypeId = selectedFieldTypeId;
             bool success = await FieldService.CreateFieldAsync(field);
 
@@ -234,6 +244,14 @@
     {
         try
         {
+
+            var existingField = fields.FirstOrDefault(f => f.FieldName.Equals(field.FieldName, StringComparison.OrdinalIgnoreCase) && f.IdField != field.IdField);
+            if (existingField != null)
+            {
+                errorMessage = "Tên sân bóng đã tồn tại, vui lòng chọn tên khác.";
+                return;
+            }
+
             field.FieldTypeId = SelectedFieldTypeId;
 
             bool success = await FieldService.UpdateFieldAsync(field.IdField, field);

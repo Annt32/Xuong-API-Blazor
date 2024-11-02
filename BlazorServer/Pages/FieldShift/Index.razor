@@ -1,5 +1,6 @@
 ﻿@page "/FieldShifts"
 @using AppData.DTO
+@using AppData.DTO.User_RoleDto
 @using AppData.Entities
 @using BlazorServer.IServices
 @using BlazorServer.Models
@@ -17,7 +18,7 @@
         opacity: 0.6;
         cursor: not-allowed;
         background-color: #d3d3d3; /* Màu xám nhạt */
-        color: #ffffff; /* Màu chữ trắng (tuỳ chọn) */
+        color: #ffffff; /* Trắng */
         border-color: #d3d3d3; /* Màu viền xám nhạt */
     }
 
@@ -39,7 +40,6 @@
                     </div>
                 }
 
-                <!-- Dropdown chọn sân bóng -->
                 <div class="form-group">
                     <label for="FieldShift">Chọn Sân</label>
                     <select id="FieldShift" class="form-control" @bind="fieldShiftVM.IdField">
@@ -51,48 +51,43 @@
                     </select>
                 </div>
 
-                <!-- Dropdown chọn ca -->
                 <div class="form-group">
                     <label for="Shift">Chọn Ca</label>
                     <select id="Shift" class="form-control" @bind="fieldShiftVM.IdShift">
                         <option value="">-- Chọn Ca --</option>
                         @foreach (var shift in shifts)
                         {
-                            <option value="@shift.IdShift">@shift.ShiftName</option>
+                            <option value="@shift.IdShift">@shift.ShiftName @shift.StartTime-@shift.EndTime</option>
                         }
                     </select>
                 </div>
 
-
-                <!-- Phần chọn ngày -->
                 <div class="form-group">
                     <label for="Date">Chọn Ngày</label>
                     <input type="date" id="Date" class="form-control" @bind="fieldShift.Time" />
                     <ValidationMessage For="@(() => fieldShift.Time)" />
                 </div>
 
-                <!-- Dropdown chọn khách hàng -->
                 <div class="form-group">
-                    <label for="Customer">Chọn Khách Hàng</label>
-                    <select id="Customer" class="form-control" @bind="selectedCustomerId">
-                        <option value="">-- Chọn Khách Hàng --</option>
-                        @foreach (var customer in customers)
-                        {
-                            <option value="@customer.UserId">@customer.FullName</option>
-                        }
-                    </select>
-                </div>
-            
-                <div class="form-group">
-                    <label>Trạng Thái</label><br />
-                    <input type="radio" id="active" @onclick="() => fieldShift.Status = FieldShiftStatus.WaitingForCheckin" checked="@((fieldShift.Status == FieldShiftStatus.WaitingForCheckin))" />
-                    <label for="active">Chờ CheckIn</label>
-                    <input type="radio" id="maintenance" @onclick="() => fieldShift.Status = FieldShiftStatus.Renting" checked="@((fieldShift.Status == FieldShiftStatus.Renting))" />
-                    <label for="maintenance">Đang Thuê</label>
-                    <ValidationMessage For="@(() => fieldShift.Status)" />
+                    <label for="CustomerPhone">Số điện thoại khách hàng</label>
+                    <div class="input-group">
+                        <input type="text" id="CustomerPhone" class="form-control" @bind="customerPhoneNumber" placeholder="Nhập số điện thoại" />
+                        <div class="input-group-append">
+                            <button type="button" class="btn btn-success ml-2" @onclick="CheckCustomer">Kiểm tra</button>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- Nút Tạo và Cập Nhật -->
+
+
+                @if (selectedCustomer != null)
+                {
+                    <div class="mt-3">
+                        <p><strong>Khách hàng:</strong> @selectedCustomer.FullName</p>
+                        <p><strong>Số điện thoại:</strong> @selectedCustomer.PhoneNumber</p>
+                    </div>
+                }
+
                 <div class="form-group">
                     @if (fieldShift.IdFieldShift == Guid.Empty)
                     {
@@ -168,7 +163,7 @@
                                         </button>
 
                                         <!-- Nút CheckIn chỉ hiện khi Status == 1 -->
-                                        <button class="btn btn-success" @onclick="() => ConfirmCheckIn(item.IdFieldShift)" disabled="@(item.Status != FieldShiftStatus.WaitingForCheckin)">
+                                        <button class="btn btn-success" @onclick="() => ConfirmCheckIn(item.IdFieldShift)" hidden="@(item.Status != FieldShiftStatus.WaitingForCheckin)">
                                             CheckIn
                                         </button>
                                     </td>
@@ -192,42 +187,38 @@
     private List<ShiftViewModel> shifts = new List<ShiftViewModel>(); 
 
     private Guid selectedCustomerId;  // Lưu ID khách hàng đã chọn
-
+    private WebUser selectedCustomer;
+    private string customerPhoneNumber;
 
     private string errorMessage = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        // Load danh sách FieldShift và các thông tin liên quan
         var allFieldshifts = await FieldshiftService.GetAllFieldshiftAsync();
-
         customers = await UserService.GetAllFieldsAsync();
-        fieldShifts = await FieldService.GetAllFieldsAsync();  
-        shifts = await ShiftService.GetAllShiftsAsync();  
+        fieldShifts = await FieldService.GetAllFieldsAsync();
+        shifts = await ShiftService.GetAllShiftsAsync();
 
-
+        // Thực hiện load dữ liệu ban đầu
         fieldShiftViewModels = (await Task.WhenAll(allFieldshifts.Select(async f =>
-        {   
+        {
             var shift = await ShiftService.GetShiftByIdAsync(f.IdShift);
             var field = await FieldService.GetFieldByIdAsync(f.IdField);
-
-            // Lấy thông tin khách hàng từ CreatedBy
             var customer = await UserService.GetFieldByIdAsync(Guid.Parse(f.CreatedBy));
 
             return new FieldShiftViewModel
                 {
                     IdFieldShift = f.IdFieldShift,
+                    IdField = f.IdField,
                     IdShift = f.IdShift,
-                    ShiftName = shift?.ShiftName ?? "Unknown",  
-                    FieldName = field?.FieldName ?? "Unknown", 
+                    ShiftName = shift?.ShiftName ?? "Unknown",
+                    FieldName = field?.FieldName ?? "Unknown",
                     Time = f.Time,
-                    StartTime = shift?.StartTime ?? "Zero",     
-                    EndTime = shift?.EndTime ?? "Zero",        
+                    StartTime = shift?.StartTime ?? "Zero",
+                    EndTime = shift?.EndTime ?? "Zero",
                     Status = f.Status,
                     CreatedAt = f.CreatedAt,
                     UpdatedAt = f.UpdatedAt,
-
-                    // Hiển thị thông tin khách hàng
                     CustomerFullName = customer?.FullName ?? "Unknown",
                     CustomerPhoneNumber = customer?.PhoneNumber ?? "Unknown"
                 };
@@ -235,7 +226,21 @@
     }
 
 
+    private async Task CheckCustomer()
+    {
+        // Kiểm tra khách hàng dựa vào số điện thoại đã nhập
+        selectedCustomer = customers.FirstOrDefault(c => c.PhoneNumber == customerPhoneNumber);
 
+        if (selectedCustomer == null)
+        {
+            errorMessage = "Không tìm thấy khách hàng với số điện thoại này.";
+        }
+        else
+        {
+            errorMessage = string.Empty;
+            selectedCustomerId = selectedCustomer.Id; // Lưu ID khách hàng đã chọn
+        }
+    }
 
 
     private async Task<string> GetShiftName(Guid idShift)
@@ -250,9 +255,9 @@
         return field?.FieldName ?? "Unknown";
     }
 
-    private async Task<WebUser> GetUserById(Guid userId)
+    private async Task<WebUser> GetUserById(Guid Id)
     {
-        var user = await UserService.GetFieldByIdAsync(userId);
+        var user = await UserService.GetFieldByIdAsync(Id);
         return user;
     }
 
@@ -288,35 +293,47 @@
     {
         if (selectedCustomerId == Guid.Empty)
         {
-            errorMessage = "Vui lòng chọn khách hàng.";
+            errorMessage = "Vui lòng kiểm tra và chọn khách hàng trước khi tạo đặt sân.";
+            return;
+        }
+
+        // Kiểm tra trùng ca, sân và user
+        bool isDuplicate = fieldShiftViewModels.Any(f =>
+            f.IdField == fieldShiftVM.IdField &&
+            f.IdShift == fieldShiftVM.IdShift &&
+            f.Time.Date == fieldShift.Time.Date);
+
+        if (isDuplicate)
+        {
+            errorMessage = "Không thể đặt sân. Ca và sân đã được đặt hoặc khách hàng đã có đặt sân trong cùng thời gian.";
             return;
         }
 
         var newFieldShift = new FieldShiftDTO
             {
                 IdFieldShift = Guid.NewGuid(),
-                IdShift = fieldShiftVM.IdShift, 
-                IdField = fieldShiftVM.IdField, 
+                IdShift = fieldShiftVM.IdShift,
+                IdField = fieldShiftVM.IdField,
+                Time = fieldShift.Time,
                 Status = FieldShiftStatus.WaitingForCheckin,
                 CreatedBy = selectedCustomerId.ToString(),
                 CreatedAt = DateTime.Now,
                 UpdatedAt = DateTime.Now
             };
 
+        Console.WriteLine("Time: " + newFieldShift.Time);
         var result = await FieldshiftService.CreateFieldshiftAsync(newFieldShift);
 
         if (result)
         {
-            Console.WriteLine("Thêm thành công");
+            errorMessage = "Thêm thành công!";
+            await OnInitializedAsync(); // Tải lại danh sách sau khi thêm mới
         }
         else
         {
             errorMessage = "Có lỗi xảy ra.";
         }
     }
-
-
-
 
     private void HandleInvalidSubmit()
     {

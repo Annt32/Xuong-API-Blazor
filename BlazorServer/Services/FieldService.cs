@@ -37,6 +37,7 @@ public class FieldService : IFieldService
             {
                 IdField = f.IdField,
                 FieldName = f.FieldName,
+                Location = f.Location,
                 Status = f.Status,
                 FieldTypeId = f.FieldTypeId,
                 FieldTypeName = fieldType != null ? fieldType.Name : "Không xác định",
@@ -69,6 +70,7 @@ public class FieldService : IFieldService
         {
             IdField = field.IdField,
             FieldName = field.FieldName,
+            Location = field.Location,
             Status = field.Status,
             FieldTypeId = field.FieldTypeId,
             FieldTypeName = fieldType != null ? fieldType.Name : "Không xác định",
