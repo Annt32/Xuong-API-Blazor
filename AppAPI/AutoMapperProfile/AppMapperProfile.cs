@@ -8,6 +8,8 @@ namespace AppAPI.AutoMapperProfile
 		public AppMapperProfile()
 		{
 			CreateMap<FieldShiftDTO, FieldShift>().ReverseMap();
+			CreateMap<InvoiceDTO, Invoice>().ReverseMap();
+			CreateMap<InvoiceDetailDTO, InvoiceDetail>().ReverseMap();
 
 		}
 	}

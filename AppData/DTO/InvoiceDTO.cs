@@ -6,14 +6,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace AppData.Entities
+namespace AppData.DTO
 {
-    public class Invoice
+    public class InvoiceDTO
     {
         [Key]
         public Guid IdInvoice { get; set; }
-
-        [ForeignKey("User")]
         public Guid UserId { get; set; }
         public string? Name { get; set; }
         public string? Email { get; set; }
@@ -25,10 +23,5 @@ namespace AppData.Entities
         public DateTime UpdatedAt { get; set; }
         public string? CreatedBy { get; set; }
         public string? UpdatedBy { get; set; }
-
-        // Navigation properties
-        public User User { get; set; }
-        public ICollection<InvoiceDetail> InvoiceDetails { get; set; }
     }
-
 }

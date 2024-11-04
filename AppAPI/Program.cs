@@ -102,6 +102,8 @@ namespace AppAPI
             //Auto Mapper
             builder.Services.AddAutoMapper(typeof(AutoMapperProfile.AutoMapperProfile).Assembly);
             builder.Services.AddScoped<IRepository<FieldShift>, Repository<FieldShift>>();
+            builder.Services.AddScoped<IRepository<Invoice>, Repository<Invoice>>();
+            builder.Services.AddScoped<IRepository<InvoiceDetail>, Repository<InvoiceDetail>>();
 
 			var app = builder.Build();
 

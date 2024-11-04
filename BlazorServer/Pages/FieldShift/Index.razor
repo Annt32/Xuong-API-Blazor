@@ -31,6 +31,10 @@
             <div class="card-header">
                 <strong>Thông Tin</strong>
             </div>
+            @if (b==false)
+            {
+                <p>Ca Ban Xoa Da Co Hoa Don</p>
+            }
             <EditForm Model="@fieldShift" OnValidSubmit="HandleSubmit" OnInvalidSubmit="HandleInvalidSubmit">
                 <DataAnnotationsValidator />
                 @if (!string.IsNullOrEmpty(errorMessage))
@@ -348,6 +352,25 @@
     private async Task ConfirmDelete(Guid idFieldShift)
     {
         // Logic xóa
+    bool b=true;
+    private async Task ConfirmDelete(Guid id)
+    {
+        bool confirmed = await JS.InvokeAsync<bool>("confirmAction", "Bạn có chắc chắn muốn xóa ca sân này?");
+        if (confirmed)
+        {
+            var check = _dbcontext.InvoiceDetails.FirstOrDefault(x => x.IdFieldShift == id);
+            if (check==null)
+            {
+                await DeleteField(id);
+                b = true;
+            }
+            else
+            {
+                b = false;
+
+            }
+           
+        }
     }
 
    
