@@ -28,7 +28,7 @@ namespace AppAPI
             builder.Services.AddIdentity<User, Role>(options =>
     options.User.AllowedUserNameCharacters += " ")
         .AddEntityFrameworkStores<AppDBContext>()
-        .AddDefaultTokenProviders();
+        .AddTokenProvider("MyApp",typeof(DataProtectorTokenProvider<User>));
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -39,7 +39,7 @@ namespace AppAPI
                 {
                     In = ParameterLocation.Header,
                     Description = "Please enter 'Bearer [jwt]'",
-                    Name = "Authorrization",
+                    Name = "Authorization",
                     Type = SecuritySchemeType.ApiKey
                 });
                 var scheme = new OpenApiSecurityScheme
@@ -47,7 +47,7 @@ namespace AppAPI
                     Reference = new OpenApiReference
                     {
                         Type = ReferenceType.SecurityScheme,
-                        Id = "Bear"
+                        Id = "Bearer"
                     }
                 };
 
