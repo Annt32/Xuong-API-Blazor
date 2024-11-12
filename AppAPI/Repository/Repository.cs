@@ -73,5 +73,7 @@ namespace AppAPI.Repositories
             _context.SaveChanges();
         }
         public async Task ModifileUpdate(T value) { _context.Entry(value).State = EntityState.Modified; _context.SaveChanges(); }
+
+        
     }
 }
