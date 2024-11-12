@@ -24,7 +24,7 @@
 
 @if (expiration is not null)
 {
-    <p>đăng nhập hết hạn sau @expiration?.ToLongTimeString()</p>
+    <p>Đăng nhập hết hạn sau @expiration?.ToLongTimeString()</p>
 }
 
 @if (errorMessage is not null)
@@ -36,19 +36,34 @@
     private LoginModel model = new LoginModel();
     private DateTime? expiration;
     private string errorMessage;
+    private bool hasRendered = false;
+    private bool isRendered = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            hasRendered = true; // Đánh dấu rằng prerendering đã hoàn tất
+            StateHasChanged(); // Cập nhật lại component để phản ánh các thay đổi trạng thái
+        }
+    }
 
     private async Task SubmitAsync()
     {
+        if (!hasRendered)
+        {
+            errorMessage = "Trang đang tải, vui lòng chờ...";
+            return;
+        }
+
         try
         {
             expiration = await AutenticationService.LoginAsync(model);
-
             errorMessage = null;
         }
         catch (Exception ex)
         {
             expiration = null;
-
             errorMessage = ex.Message;
         }
     }

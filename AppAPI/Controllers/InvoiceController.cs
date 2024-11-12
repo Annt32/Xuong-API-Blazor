@@ -44,9 +44,7 @@ namespace AppAPI.Controllers
                 {
                     return Ok("Id Null");
                 }
-                entity.Name = invoiceDTO.Name;
-                entity.Email = invoiceDTO.Email;
-                entity.PhoneNumber = invoiceDTO.PhoneNumber;
+
                 entity.Notes = invoiceDTO.Notes;
                 _respoitory.ModifileUpdate(entity);
                 return Ok("Update success");

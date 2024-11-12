@@ -1,4 +1,4 @@
-﻿@page "/Invoice/Invoice-put/{id:guid}"
+﻿@* @page "/Invoice/Invoice-put/{id:guid}"
 @using AppData.Entities
 @using IServices
 @inject IInvoiceServices services
@@ -50,6 +50,7 @@
 	[Parameter]
 	public Guid id { get; set; }
 	Invoice invoice = new Invoice();
+
 	protected override async Task OnInitializedAsync()
 	{
 		invoice = await services.GetinvoiceByIdAsync(id);	
@@ -60,3 +61,4 @@
 		navigation.NavigateTo("/invoice");
 	}
 }
+ *@

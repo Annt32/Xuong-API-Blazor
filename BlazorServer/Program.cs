@@ -8,6 +8,7 @@ using BlazorServer.Services;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using AuthenticationService = BlazorServer.Services.AuthenticationService;
 using IAuthenticationService = BlazorServer.IServices.IAuthenticationService;
 
@@ -38,6 +39,9 @@ namespace BlazorServer
             builder.Services.AddScoped<IFieldTypeServices, FieldTypeService>();
             builder.Services.AddScoped<IFieldShiftService, FieldShiftService>();
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
+
+            builder.Services.AddScoped<IInvoiceServices, InvoiceService>();
+            builder.Services.AddScoped<IInvoiceDetailService, InvoiceDetailService>();
 
 
             builder.Services.AddBlazoredSessionStorage();

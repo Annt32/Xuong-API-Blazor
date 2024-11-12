@@ -113,10 +113,12 @@ namespace AppAPI.Controllers
 			}
 		}
 
-		public void ListDate()
-		{
-			time = _fieldshiftRepository.GetAll().Select(p=>p.Time).ToList();
-        }
+
+		//public void ListDate()
+		//{
+		//	time = _fieldshiftRepository.GetAll().Select(p=>p.Time).ToList();
+  //      }
+
 		[HttpPost]
 		public async Task<IActionResult> CheckDate(DateTime check)
 		{

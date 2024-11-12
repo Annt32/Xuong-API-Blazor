@@ -1,0 +1,223 @@
+﻿@page "/invoice"
+@using AppData.Entities
+@using BlazorServer.IServices
+@inject IInvoiceServices services
+@inject NavigationManager navigation
+
+<h3>InvoiceIndex</h3>
+<div class="row">
+    <!-- Thông Tin Hóa Đơn -->
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <strong>Thông Tin Hóa Đơn</strong>
+            </div>
+            <EditForm Model="@invoice" OnValidSubmit="HandleSubmit" OnInvalidSubmit="HandleInvalidSubmit">
+                <DataAnnotationsValidator />
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="alert @((errorMessage.Contains("thành công") ? "alert-success" : "alert-danger"))" role="alert">
+                        @errorMessage
+                    </div>
+                }
+
+                <div class="form-group">
+                    <label for="InvoiceId">Mã Hóa Đơn</label>
+                    <input id="InvoiceId" class="form-control" @bind="invoice.IdInvoice" readonly />
+                </div>
+
+                <div class="form-group">
+                    <label for="UserId">Mã Khách Hàng</label>
+                    <input id="UserId" class="form-control" @bind="invoice.UserId" readonly />
+                </div>
+
+                <div class="form-group">
+                    <label for="AdditionalFee">Phí Bổ Sung</label>
+                    <input type="number" id="AdditionalFee" class="form-control" @bind="invoice.AdditionalFee" />
+                    <ValidationMessage For="@(() => invoice.AdditionalFee)" />
+                </div>
+
+                <div class="form-group">
+                    <label for="Status">Trạng Thái</label>
+                    <select id="Status" class="form-control" @bind="invoice.Status">
+                        <option value="1">Đã Thanh Toán</option>
+                        <option value="0">Chưa Thanh Toán</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="Notes">Ghi Chú</label>
+                    <textarea id="Notes" class="form-control" @bind="invoice.Notes"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <button type="submit" class="btn btn-primary">Cập Nhật</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+
+    <!-- Danh Sách Hóa Đơn -->
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header">
+                <strong>Danh Sách Hóa Đơn</strong>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Mã Hóa Đơn</th>
+                            <th>Khách Hàng</th>
+                            <th>Số Điện Thoại</th>
+                            <th>Email</th>
+                            <th>Tổng tiền</th>
+                            <th>Phí Bổ Sung</th>
+                            <th>Ghi Chú</th>
+                            <th>Trạng Thái</th>
+                            <th>Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (invoices == null || !invoices.Any())
+                        {
+                            <tr>
+                                <td colspan="9" class="text-center">Đang tải dữ liệu...</td>
+                            </tr>
+                        }
+                        else
+                        {
+                            int index = 0;
+                            @foreach (var item in invoices)
+                            {
+                                var user = lstUser.FirstOrDefault(u => u.Id == item.UserId);
+                                <tr>
+                                    <td>@(++index)</td>
+                                    <td>@item.IdInvoice</td>
+                                    <td>@user?.FullName</td>
+                                    <td>@user?.PhoneNumber</td>
+                                    <td>@user?.Email</td>
+                                    <td>@item?.TotalAmount</td>                                
+                                    <td>@item.AdditionalFee</td>                               
+                                    <td>@item.Notes</td>
+                                    <td>@item.Status</td>
+                                    <td>
+                                        <button class="btn btn-warning" @onclick="() => SelectInvoice(item.IdInvoice)">Chi Tiết</button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Danh Sách Chi Tiết Hóa Đơn -->
+        @if (selectedInvoiceDetails != null && selectedInvoiceDetails.Any())
+        {
+            <div class="card mt-3">
+                <div class="card-header">
+                    <strong>Chi Tiết Hóa Đơn</strong>
+                </div>
+                <div class="card-body">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>IdInvoiceDetail</th>
+                                <th>IdFieldShift</th>
+                                <th>Giá</th>
+                                <th>Thao tác</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (selectedInvoiceDetails == null || !selectedInvoiceDetails.Any())
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center">Đang tải dữ liệu...</td>
+                                </tr>
+                            }
+                            else
+                            {
+                                int index = 0;
+                                @foreach (var detail in selectedInvoiceDetails)
+                                {
+                                    // Tìm FieldShift theo IdFieldShift trong mỗi chi tiết hóa đơn
+                                    var fieldShift = FieldShifts.FirstOrDefault(f => f.IdFieldShift == detail.IdFieldShift);
+                                    var field = Fields.FirstOrDefault(f => f.IdField == fieldShift?.IdField);
+                                    var shift = Shifts.FirstOrDefault(s => s.IdShift == fieldShift?.IdShift);
+
+                                    <tr>
+                                        <td>@(++index)</td>
+                                        <td>@detail.IdInvoiceDetail</td>
+                                        <td>@field?.FieldName</td> 
+                                        <td>@field?.Location</td>
+                                        <td>@shift?.ShiftName @shift?.StartTime - @shift?.EndTime</td>
+                                        <td>@detail.Status</td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+
+                    </table>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private Invoice invoice = new Invoice();
+    private List<Invoice> invoices = new List<Invoice>();
+
+    private List<User> lstUser = new List<User>();
+
+    private List<InvoiceDetail> lstInvoiceDetail = new List<InvoiceDetail>();
+    private List<InvoiceDetail> selectedInvoiceDetails = new List<InvoiceDetail>(); 
+
+    private List<FieldShift> FieldShifts = new List<FieldShift>();
+    private List<Field> Fields = new List<Field>();
+    private List<Shift> Shifts = new List<Shift>();
+
+
+    private Guid selectedInvoiceId = Guid.Empty; // Mã hóa đơn được chọn
+    private string errorMessage = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        invoices = await services.GetAllInvoiceAsync();
+        lstUser = await services.GetAllUser();
+        lstInvoiceDetail = await services.GetAllInvoiceDetailAsync();
+        FieldShifts = await services.GetAllFieldShiftAsync();
+        Fields = await services.GetAllShiftAsync();
+        Shifts = await services.GetFieldByTypeAsync();
+    }
+
+    private void SelectInvoice(Guid id)
+    {
+        selectedInvoiceId = id;
+        selectedInvoiceDetails = lstInvoiceDetail.Where(detail => detail.IdInvoice == selectedInvoiceId).ToList();
+    }
+
+    protected async Task NavigateToEdit(Guid id)
+    {
+        navigation.NavigateTo($"/Invoice/Invoice-put/{id}");
+    }
+
+    private async Task HandleSubmit()
+    {
+        bool result = await services.UpdateUserInvoice(invoice.IdInvoice, invoice);
+        errorMessage = result ? "Cập nhật hóa đơn thành công" : "Cập nhật hóa đơn thất bại";
+    }
+
+    private void HandleInvalidSubmit()
+    {
+        // Xử lý khi form không hợp lệ
+    }
+
+    private void ConfirmDelete(Guid id)
+    {
+        // Thực hiện xóa hóa đơn theo Id
+    }
+}
