@@ -9,5 +9,6 @@ namespace BlazorServer.IServices
         ValueTask<string> GetJwtAsync();
         Task<DateTime> LoginAsync(LoginModel model);
         Task LogoutAsync();
+        Task<bool> RefreshAsync();
     }
 }

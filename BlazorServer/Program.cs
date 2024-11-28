@@ -25,17 +25,30 @@ namespace BlazorServer
             builder.Services.AddServerSideBlazor();
             builder.Services.AddSingleton<WeatherForecastService>();
 
-            builder.Services.AddTransient<AuthenticationHandler>(); 
+            builder.Services.AddTransient<AuthenticationHandler>();
 
 
             // Đăng ký HttpClient
-            builder.Services.AddHttpClient("ServerApi")
-                    .ConfigureHttpClient(c => c.BaseAddress = new Uri(builder.Configuration["ServerUrl"] ?? ""))
-                    .AddHttpMessageHandler<AuthenticationHandler>();
+            //builder.Services.AddHttpClient("ServerApi")
+            //    .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://localhost:7143" ?? ""))
+            //    .AddHttpMessageHandler<AuthenticationHandler>();
 
+
+            //builder.Services.AddHttpClient("ServerApi")
+            //                .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://localhost:7143" ?? ""))
+            //                .AddHttpMessageHandler<AuthenticationHandler>();
+
+            builder.Services.AddHttpClient("ServerApi")
+                .ConfigureHttpClient(c => c.BaseAddress = new Uri("https://localhost:7143" ?? ""))
+                .AddHttpMessageHandler<AuthenticationHandler>();
+
+            builder.Services.AddAuthorizationCore();
+
+
+            
             // Đăng ký các dịch vụ
             builder.Services.AddScoped<IFieldService, FieldService>();
-            builder.Services.AddHttpClient<IServices<WebUser>, UserService>(); // Sửa lại cách đăng ký UserService với HttpClient
+            builder.Services.AddScoped<IUserService, UserService>(); // Sửa lại cách đăng ký UserService với HttpClient
             builder.Services.AddScoped<IFieldTypeServices, FieldTypeService>();
             builder.Services.AddScoped<IFieldShiftService, FieldShiftService>();
             builder.Services.AddScoped<IAuthenticationService, AuthenticationService>();
@@ -44,8 +57,20 @@ namespace BlazorServer
             builder.Services.AddScoped<IInvoiceDetailService, InvoiceDetailService>();
 
 
-            builder.Services.AddBlazoredSessionStorage();
             builder.Services.AddScoped<IShiftService, ShiftService>();
+
+
+            builder.Services.AddAuthorization();
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowPages",
+                builder =>
+                {
+                    builder.WithOrigins("https://localhost:7143")
+                           .AllowAnyHeader()
+                           .AllowAnyMethod();
+                });
+            });
 
             var app = builder.Build();
 
@@ -60,13 +85,18 @@ namespace BlazorServer
             app.UseHttpsRedirection();
 
             app.UseStaticFiles();
+            app.UseCors("AllowPages");
 
             app.UseRouting();
+
+            app.UseAuthorization();
+            app.UseAuthentication();
 
             app.MapBlazorHub();
             app.MapFallbackToPage("/_Host");
 
-            app.Run();
+            app.RunAsync();
+            Console.ReadKey();
         }
     }
 }

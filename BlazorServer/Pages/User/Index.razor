@@ -3,7 +3,7 @@
 @using AppData.Entities
 @using AppData.DTO
 @using BlazorServer.IServices
-@inject IServices<WebUser> UserService
+@inject IUserService UserService
 @inject IJSRuntime JS
 
 <h3>Quản Lý Người Dùng</h3>
@@ -154,7 +154,7 @@
 
     protected override async Task OnInitializedAsync()
     {
-        allUsers = await UserService.GetAllFieldsAsync();
+        allUsers = await UserService.GetAllUsersAsync();
         Users = new List<WebUser>(allUsers);
     }
 
@@ -174,10 +174,10 @@
     {
         try
         {
-            bool success = await UserService.CreateFieldAsync(User);
+            bool success = await UserService.CreateUsersAsync(User);
             if (success)
             {
-                Users = await UserService.GetAllFieldsAsync();
+                Users = await UserService.GetAllUsersAsync();
                 User = new WebUser();
                 errorMessage = "Đã tạo mới thành công!";
             }
@@ -196,10 +196,10 @@
     {
         try
         {
-            bool success = await UserService.UpdateFieldAsync(User.Id, User);
+            bool success = await UserService.UpdateUsersAsync(User.Id, User);
             if (success)
             {
-                Users = await UserService.GetAllFieldsAsync();
+                Users = await UserService.GetAllUsersAsync();
                 User = new WebUser();
                 errorMessage = "Cập nhật thành công!";
             }
@@ -256,8 +256,8 @@
 
     private async Task DeleteField(Guid id)
     {
-        await UserService.DeleteFieldAsync(id);
-        Users = await UserService.GetAllFieldsAsync();
+        await UserService.DeleteUsersAsync(id);
+        Users = await UserService.GetAllUsersAsync();
     }
 
     private void SearchFields()

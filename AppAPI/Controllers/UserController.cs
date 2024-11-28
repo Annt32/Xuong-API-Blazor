@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace AppAPI.Controllers
 {
-    [Authorize]
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class UserController : ControllerBase

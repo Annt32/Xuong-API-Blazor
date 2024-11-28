@@ -6,70 +6,68 @@ using System.Text;
 
 namespace BlazorServer.Services
 {
-    public class UserService : IServices<WebUser>
+    public class UserService : IUserService
     {
         private readonly HttpClient _httpClient;
 
-        public UserService(HttpClient httpClient)
+        //public UserService(HttpClient httpClient)
+        //{
+        //    _httpClient = httpClient;
+        //}
+        public UserService(IHttpClientFactory factory)
         {
-            _httpClient = httpClient;
+            _httpClient = factory.CreateClient("ServerApi");
         }
 
         // Thêm người dùng mới
-        public async Task<bool> CreateFieldAsync(WebUser value)
+        public async Task<bool> CreateUsersAsync(WebUser value)
         {
-            string requestURL = "https://localhost:7143/api/User/create";
-            var jsonContent = JsonConvert.SerializeObject(value);
-            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+            string requestURL = "api/User/create";
 
-            var response = await _httpClient.PostAsync(requestURL, content);
+            var response = await _httpClient.PostAsJsonAsync(requestURL, value);
             return response.IsSuccessStatusCode;
         }
 
         // Xóa người dùng dựa trên ID
-        public async Task<bool> DeleteFieldAsync(Guid id)
+        public async Task<bool> DeleteUsersAsync(Guid id)
         {
-            string requestURL = $"https://localhost:7143/api/User/delete/{id}";
+            string requestURL = $"api/User/delete/{id}";
             var response = await _httpClient.DeleteAsync(requestURL);
             return response.IsSuccessStatusCode;
         }
 
         // Lấy tất cả người dùng
-        public async Task<List<WebUser>> GetAllFieldsAsync()
+        public async Task<List<WebUser>> GetAllUsersAsync()
         {
-            string requestURL = "https://localhost:7143/api/User/get-all";
-            var response = await _httpClient.GetStringAsync(requestURL);
-            return JsonConvert.DeserializeObject<List<WebUser>>(response);
+            string requestURL = "api/User/get-all";
+            var response = await _httpClient.GetFromJsonAsync<List<WebUser>>(requestURL);
+            return response;
         }
 
         // Lấy người dùng bằng ID
-        public async Task<WebUser> GetFieldByIdAsync(Guid id)
+        public async Task<WebUser> GetUsersByIdAsync(Guid id)
         {
-            string requestURL = $"https://localhost:7143/api/User/get-by-id/{id}";
-            var response = await _httpClient.GetStringAsync(requestURL);
-            return JsonConvert.DeserializeObject<WebUser>(response);
+            string requestURL = $"api/User/get-by-id/{id}";
+            var response = await _httpClient.GetFromJsonAsync<WebUser>(requestURL);
+            return response;
         }
 
         // Cập nhật người dùng (với toàn bộ thông tin)
-        public async Task<bool> ModifileUpdateFieldAsync(WebUser value)
+        public async Task<bool> ModifileUpdateUsersAsync(WebUser value)
         {
-            string requestURL = "https://localhost:7143/api/User/update";
-            var jsonContent = JsonConvert.SerializeObject(value);
-            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+            string requestURL = "api/User/update";
 
-            var response = await _httpClient.PutAsync(requestURL, content);
+            var response = await _httpClient.PutAsJsonAsync(requestURL, value);
             return response.IsSuccessStatusCode;
         }
 
         // Cập nhật người dùng dựa trên ID
-        public async Task<bool> UpdateFieldAsync(Guid id, WebUser updatedValue)
+        public async Task<bool> UpdateUsersAsync(Guid id, WebUser updatedValue)
         {
-            string requestURL = $"https://localhost:7143/api/User/update/{id}";
+            string requestURL = $"api/User/update/{id}";
 
-            var jsonContent = JsonConvert.SerializeObject(updatedValue);
-            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-            var response = await _httpClient.PutAsync(requestURL, content);
+            var response = await _httpClient.PutAsJsonAsync(requestURL, updatedValue);
 
             return response.IsSuccessStatusCode;
         }
