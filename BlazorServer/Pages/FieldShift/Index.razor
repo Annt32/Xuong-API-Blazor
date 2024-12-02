@@ -326,17 +326,18 @@
             };
 
         Console.WriteLine("Time: " + newFieldShift.Time);
-        var result = await FieldshiftService.CreateFieldshiftAsync(newFieldShift);
+        var createdFieldShift = await FieldshiftService.CreateFieldshiftAsync(newFieldShift);
 
-        if (result)
+        if (createdFieldShift != null)
         {
             errorMessage = "Thêm thành công!";
-            await OnInitializedAsync(); // Tải lại danh sách sau khi thêm mới
+            await OnInitializedAsync(); 
         }
         else
         {
-            errorMessage = "Có lỗi xảy ra.";
+            errorMessage = "Có lỗi xảy ra: Không thể tạo đặt lịch cho sân bóng này. Vui lòng kiểm tra lại!";
         }
+
     }
 
     private void HandleInvalidSubmit()

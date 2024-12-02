@@ -43,27 +43,31 @@ namespace AppAPI.Controllers
 			return Ok(fieldshift);
 		}
 
-        [HttpPost("fieldshift-post")]
-        public IActionResult CreateField([FromBody] FieldShiftDTO fieldshift)
-        {
-            try
-            {
-                _fieldshiftRepository.Add(_mapper.Map<FieldShift>(fieldshift));
-                return Ok(new { message = "Thêm sân bóng thành công", fieldshift });
-            }
-            catch (DbUpdateException dbEx)
-            {
-                var innerException = dbEx.InnerException?.Message ?? dbEx.Message;
-                return BadRequest(new { message = $"Error: {innerException}" });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
+		[HttpPost("fieldshift-post")]
+		public IActionResult CreateField([FromBody] FieldShiftDTO fieldshift)
+		{
+			try
+			{
+				var newFieldShift = _mapper.Map<FieldShift>(fieldshift);
+				_fieldshiftRepository.Add(newFieldShift);
+
+				// Trả về đối tượng FieldShiftDTO mới
+				return Ok(_mapper.Map<FieldShiftDTO>(newFieldShift));
+			}
+			catch (DbUpdateException dbEx)
+			{
+				var innerException = dbEx.InnerException?.Message ?? dbEx.Message;
+				return BadRequest(new { message = $"Error: {innerException}" });
+			}
+			catch (Exception ex)
+			{
+				return BadRequest(new { message = ex.Message });
+			}
+		}
 
 
-        [HttpPut("fieldshift-put/{id}")]
+
+		[HttpPut("fieldshift-put/{id}")]
 		public IActionResult UpdateField(Guid id, [FromBody] FieldShiftDTO fieldshiftUpdate)
 		{
 			try

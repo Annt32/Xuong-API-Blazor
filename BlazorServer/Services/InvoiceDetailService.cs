@@ -36,5 +36,23 @@ namespace BlazorServer.Services
             var response = await _httpClient.PutAsync(requestURL, content);
             return response.IsSuccessStatusCode;
         }
-    }
+
+		public async Task<bool> CreateInvoiceDetailAsync(InvoiceDetail invoiceDetail)
+		{
+			string requestURL = "https://localhost:7143/api/InvoiceDetail/invoicedetail-create";
+			var jsonContent = JsonConvert.SerializeObject(invoiceDetail);
+			var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+			var response = await _httpClient.PostAsync(requestURL, content);
+			return response.IsSuccessStatusCode;
+		}
+
+		public async Task<bool> DeleteInvoiceDetailAsync(Guid id)
+		{
+			string requestURL = $"https://localhost:7143/api/InvoiceDetail/invoicedetail-delete/{id}";
+			var response = await _httpClient.DeleteAsync(requestURL);
+			return response.IsSuccessStatusCode;
+		}
+
+	}
 }

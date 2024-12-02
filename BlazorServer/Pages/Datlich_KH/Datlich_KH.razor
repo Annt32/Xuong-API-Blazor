@@ -6,6 +6,8 @@
 @using AppData.Entities
 @using BlazorServer.IServices
 @inject IFieldShiftService _svFS;
+@inject IInvoiceServices _invoiceService;
+@inject IInvoiceDetailService _invoiceDetailService;
 
 <div>
 	<header>
@@ -155,6 +157,7 @@
 								}
 							</InputSelect>
 						</div>
+
 						<div class="mb-3">
 							<label for="" class="form-label">Ca</label>
 							<InputSelect @bind-Value="input.IdShift" class="form-control">
@@ -322,10 +325,12 @@
 			if (_idFT != value)
 			{
 				_idFT = value;
+				Console.WriteLine($"IdFT đã thay đổi: {_idFT}"); // Kiểm tra thay đổi
 				LoadField(); // Gọi hàm load danh sách sân khi giá trị thay đổi
 			}
 		}
 	}
+
 
 
 	private List<FieldDTO> _lstF = new List<FieldDTO>();
@@ -336,6 +341,10 @@
 		GenerateCalendars();
 		await LoadFieldType();
 		await LoadShift();
+		await LoadField();
+
+		Console.WriteLine($"Số lượng loại sân trong _lstFT: {_lstFT.Count}");
+
 	}
 
 	//Open modal 1
@@ -361,11 +370,20 @@
 	//Load Field
 	private async Task LoadField()
 	{
+		
 		var result = await _svFS.GetFieldByTypeAsync(_idFT);
-
-		_lstF = result.OrderBy(x => x.FieldName).ToList();
-		StateHasChanged();
+		if (result != null)
+		{
+			_lstF = result.OrderBy(x => x.FieldName).ToList();
+			StateHasChanged();
+		}
+		else
+		{
+			Console.WriteLine("Không tìm thấy dữ liệu cho Field.");
+		}
+		
 	}
+
 
 	//Load Shift
 	private async Task LoadShift()
@@ -436,15 +454,94 @@
 	{
 		input.Status = AppData.Enum.FieldShiftStatus.WaitingForCheckin;
 		input.Time = selectedDate;
-		bool check = await _svFS.CreateFieldshiftAsync(input);
+		input.CreatedBy = "ba9cff05-7ead-445e-0c2e-08dcf90f16c9";
+		input.UpdatedBy = "system";
 
-		if (check)
+		// Tạo FieldShift và lấy đối tượng FieldShift trả về
+		var createdFieldShift = await _svFS.CreateFieldshiftAsync(input);
+
+		if (createdFieldShift != null && createdFieldShift.IdFieldShift != Guid.Empty)
 		{
-			messageString = "Đặt lịch thành công";
+			// Tìm hoặc tạo Invoice cho ngày này
+			Invoice invoice = await GetOrCreateInvoice(selectedDate);
+
+			if (invoice != null)
+			{
+				// Tạo InvoiceDetail cho FieldShift vừa tạo
+				bool checkInvoiceDetail = await CreateInvoiceDetail(invoice.IdInvoice, createdFieldShift.IdFieldShift);
+
+				if (checkInvoiceDetail)
+				{
+					messageString = "Đặt lịch thành công";
+				}
+				else
+				{
+					messageString = "Thêm chi tiết hóa đơn thất bại";
+				}
+			}
+			else
+			{
+				messageString = "Không thể tạo hoặc lấy hóa đơn";
+			}
 		}
 		else
 		{
-			messageString = "Đặt lịch thất bại";
+			messageString = "Đặt lịch thất bại - Không thể tạo FieldShift";
 		}
 	}
+
+	// Hóa đơn khi tạo mới trong ngày đang bị lỗi (=============================================================================)
+
+
+	// Hàm kiểm tra hoặc tạo mới Invoice
+	private async Task<Invoice> GetOrCreateInvoice(DateTime date)
+	{
+		// Tìm Invoice theo ngày
+		var invoices = await _invoiceService.GetAllInvoiceAsync();
+		var existingInvoice = invoices.FirstOrDefault(inv => inv.CreatedAt.Date == date.Date);
+
+		if (existingInvoice != null)
+		{
+			return existingInvoice;
+		}
+		else
+		{
+			// Tạo Invoice mới
+			Invoice newInvoice = new Invoice
+				{
+					IdInvoice = Guid.NewGuid(),
+					UserId = Guid.Parse("ba9cff05-7ead-445e-0c2e-08dcf90f16c9"), // Giả sử UserId có trong FieldShift hoặc set từ trước
+					Status = 1,
+					AdditionalFee = 0, // Phí bổ sung, điều chỉnh nếu cần
+					TotalAmount = 0, // Tổng số tiền, điều chỉnh nếu cần
+					CreatedAt = date,
+					UpdatedAt = date,
+					CreatedBy = input.CreatedBy,
+					UpdatedBy = "system",
+					Notes = "Hóa đơn đặt lịch"
+				};
+
+			bool checkInvoice = await _invoiceService.CreateInvoiceAsync(newInvoice);
+			return checkInvoice ? newInvoice : null;
+		}
+	}
+
+	// Hàm tạo mới InvoiceDetail
+	private async Task<bool> CreateInvoiceDetail(Guid invoiceId, Guid fieldShiftId)
+	{
+		InvoiceDetail newInvoiceDetail = new InvoiceDetail
+			{
+				IdInvoiceDetail = Guid.NewGuid(),
+				IdInvoice = invoiceId,
+				IdFieldShift = fieldShiftId,
+				Deposit = 100000, 
+				Status = 1, 
+				CreatedAt = DateTime.Now,
+				UpdatedAt = DateTime.Now,
+				CreatedBy = input.CreatedBy
+			};
+
+		return await _invoiceDetailService.CreateInvoiceDetailAsync(newInvoiceDetail);
+	}
+
 }

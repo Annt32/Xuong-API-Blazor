@@ -6,6 +6,7 @@ using BlazorServer.IServices;
 using Newtonsoft.Json;
 using System.Net.Http;
 using System.Text;
+using System.Net.Http.Json;
 
 namespace BlazorServer.Services
 {
@@ -17,33 +18,37 @@ namespace BlazorServer.Services
             _httpClient = httpClient;
         }
 
-        // Tạo mới FieldShift bằng DTO
-        public async Task<bool> CreateFieldshiftAsync(FieldShiftDTO fieldshift)
-        {
-            string requestURL = "https://localhost:7143/api/FieldShift/fieldshift-post";
+		// Tạo mới FieldShift bằng DTO
+		public async Task<FieldShiftDTO> CreateFieldshiftAsync(FieldShiftDTO fieldshift)
+		{
+			string requestURL = "https://localhost:7143/api/FieldShift/fieldshift-post";
+			var response = await _httpClient.PostAsJsonAsync(requestURL, fieldshift);
 
-            // Gửi request tới API
-            var response = await _httpClient.PostAsJsonAsync(requestURL, fieldshift);
+			if (!response.IsSuccessStatusCode)
+			{
+				var errorContent = await response.Content.ReadAsStringAsync();
+				Console.WriteLine($"Error: {response.StatusCode}, Message: {errorContent}");
+				throw new Exception($"Request failed with status code: {response.StatusCode}. Details: {errorContent}");
+			}
 
-            // Kiểm tra nếu request không thành công
-            if (!response.IsSuccessStatusCode)
-            {
-                // Đọc nội dung phản hồi từ API
-                var errorContent = await response.Content.ReadAsStringAsync();
+			// Kiểm tra và Deserialize phản hồi từ API
+			var createdFieldShift = await response.Content.ReadFromJsonAsync<FieldShiftDTO>();
 
-                // Log hoặc hiển thị lỗi từ API (tùy thuộc vào cách bạn xử lý log)
-                Console.WriteLine($"Error: {response.StatusCode}, Message: {errorContent}");
+			// Nếu phản hồi từ API null, in ra lỗi để kiểm tra
+			if (createdFieldShift == null)
+			{
+				Console.WriteLine("Không nhận được đối tượng từ API.");
+				throw new Exception("API không trả về đối tượng FieldShiftDTO.");
+			}
 
-                // Bạn cũng có thể tùy chọn throw exception nếu cần
-                throw new Exception($"Request failed with status code: {response.StatusCode}. Details: {errorContent}");
-            }
-
-            return response.IsSuccessStatusCode;
-        }
+			return createdFieldShift;
+		}
 
 
-        // Xóa FieldShift theo ID
-        public async Task<bool> DeleteFieldshiftAsync(Guid id)
+
+
+		// Xóa FieldShift theo ID
+		public async Task<bool> DeleteFieldshiftAsync(Guid id)
         {
             string requestURL = $"https://localhost:7143/api/Fieldshift/fieldshift-delete/{id}";
             var response = await _httpClient.DeleteAsync(requestURL);
@@ -76,10 +81,18 @@ namespace BlazorServer.Services
 		{
 			var response = await _httpClient.GetFromJsonAsync<List<FieldDTO>>("https://localhost:7143/api/Field/fields-get");
 
-            var lst = response.Where(x => x.FieldTypeId == idtype).ToList();
-
-            return lst;
+			if (response != null)
+			{
+				var lst = response.Where(x => x.FieldTypeId == idtype).ToList();
+				return lst;
+			}
+			else
+			{
+				Console.WriteLine("Không có dữ liệu trả về từ API.");
+				return new List<FieldDTO>();
+			}
 		}
+
 
 		// Lấy FieldShift theo ID (sử dụng DTO)
 		public async Task<FieldShiftDTO> GetFieldshiftByIdAsync(Guid id)

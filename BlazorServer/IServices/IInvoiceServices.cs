@@ -12,7 +12,8 @@ namespace BlazorServer.IServices
         Task<List<Shift>> GetFieldByTypeAsync();
         Task<bool> UpdateUserInvoice(Guid id, Invoice invoiceupdate );
 		Task<Invoice> GetinvoiceByIdAsync(Guid id);
-
+		Task<bool> CreateInvoiceAsync(Invoice invoice);
+		Task<bool> DeleteInvoiceAsync(Guid id);
 
 	}
 }

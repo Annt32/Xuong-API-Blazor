@@ -9,10 +9,10 @@ namespace BlazorServer.IServices
     {
         Task<List<FieldShiftDTO>> GetAllFieldshiftAsync();
         Task<FieldShiftDTO> GetFieldshiftByIdAsync(Guid id);
-        Task<bool> CreateFieldshiftAsync(FieldShiftDTO fieldshift);
+        Task<FieldShiftDTO> CreateFieldshiftAsync(FieldShiftDTO fieldshift);
         Task<bool> UpdateFieldshiftAsync(Guid id, FieldShiftDTO updatedFieldShift);
         Task<bool> DeleteFieldshiftAsync(Guid id);
-
+        
         //
         Task<List<FieldTypeDTO>> GetAllFieldTypeAsync();
         Task<List<Shift>> GetAllShiftAsync();

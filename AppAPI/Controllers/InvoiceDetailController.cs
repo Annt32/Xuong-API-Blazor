@@ -59,6 +59,46 @@ namespace AppAPI.Controllers
 				throw;
 			}
 		}
+
+		[HttpPost("invoicedetail-create")]
+		public IActionResult CreateInvoiceDetail([FromBody] InvoiceDetailDTO invoicedetailDTO)
+		{
+			try
+			{
+				var invoiceDetail = _mapper.Map<InvoiceDetail>(invoicedetailDTO);
+				invoiceDetail.IdInvoiceDetail = Guid.NewGuid();
+				invoiceDetail.CreatedAt = DateTime.Now;
+				invoiceDetail.UpdatedAt = DateTime.Now;
+
+				_respoitory.Add(invoiceDetail);
+				return Ok("Invoice detail created successfully");
+			}
+			catch (Exception ex)
+			{
+				return BadRequest($"Error creating invoice detail: {ex.Message}");
+			}
+		}
+
+		[HttpDelete("invoicedetail-delete/{id}")]
+		public IActionResult DeleteInvoiceDetail(Guid id)
+		{
+			try
+			{
+				var invoiceDetail = _respoitory.GetById(id);
+				if (invoiceDetail == null)
+				{
+					return NotFound("Invoice detail not found");
+				}
+
+				_respoitory.Remove(invoiceDetail);
+				return Ok("Invoice detail deleted successfully");
+			}
+			catch (Exception ex)
+			{
+				return BadRequest($"Error deleting invoice detail: {ex.Message}");
+			}
+		}
+
 	}
 
 }

@@ -55,5 +55,45 @@ namespace AppAPI.Controllers
                 throw;
             }
         }
-    }
+
+		[HttpPost("invoice-create")]
+		public IActionResult CreateInvoice([FromBody] InvoiceDTO invoiceDTO)
+		{
+			try
+			{
+				var invoice = _mapper.Map<Invoice>(invoiceDTO);
+				invoice.IdInvoice = Guid.NewGuid();
+				invoice.CreatedAt = DateTime.Now;
+				invoice.UpdatedAt = DateTime.Now;
+
+				_respoitory.Add(invoice);
+				return Ok("Invoice created successfully");
+			}
+			catch (Exception ex)
+			{
+				return BadRequest($"Error creating invoice: {ex.Message}");
+			}
+		}
+
+		[HttpDelete("invoice-delete/{id}")]
+		public IActionResult DeleteInvoice(Guid id)
+		{
+			try
+			{
+				var invoice = _respoitory.GetById(id);
+				if (invoice == null)
+				{
+					return NotFound("Invoice not found");
+				}
+
+				_respoitory.Remove(invoice);
+				return Ok("Invoice deleted successfully");
+			}
+			catch (Exception ex)
+			{
+				return BadRequest($"Error deleting invoice: {ex.Message}");
+			}
+		}
+
+	}
 }
