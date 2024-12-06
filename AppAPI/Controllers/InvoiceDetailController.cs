@@ -48,6 +48,7 @@ namespace AppAPI.Controllers
 					return Ok("Id Null");
 				}
 				entity.IdFieldShift = invoicedetailDTO.IdFieldShift;
+				entity.Status = invoicedetailDTO.Status;
 
 
 				_respoitory.ModifileUpdate(entity);

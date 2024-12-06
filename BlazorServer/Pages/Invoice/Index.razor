@@ -4,61 +4,9 @@
 @inject IInvoiceServices services
 @inject NavigationManager navigation
 
-<h3>InvoiceIndex</h3>
-<div class="row">
-    <!-- Thông Tin Hóa Đơn -->
-    <div class="col-md-3">
-        <div class="card">
-            <div class="card-header">
-                <strong>Thông Tin Hóa Đơn</strong>
-            </div>
-            <EditForm Model="@invoice" OnValidSubmit="HandleSubmit" OnInvalidSubmit="HandleInvalidSubmit">
-                <DataAnnotationsValidator />
-                @if (!string.IsNullOrEmpty(errorMessage))
-                {
-                    <div class="alert @((errorMessage.Contains("thành công") ? "alert-success" : "alert-danger"))" role="alert">
-                        @errorMessage
-                    </div>
-                }
-
-                <div class="form-group">
-                    <label for="InvoiceId">Mã Hóa Đơn</label>
-                    <input id="InvoiceId" class="form-control" @bind="invoice.IdInvoice" readonly />
-                </div>
-
-                <div class="form-group">
-                    <label for="UserId">Mã Khách Hàng</label>
-                    <input id="UserId" class="form-control" @bind="invoice.UserId" readonly />
-                </div>
-
-                <div class="form-group">
-                    <label for="AdditionalFee">Phí Bổ Sung</label>
-                    <input type="number" id="AdditionalFee" class="form-control" @bind="invoice.AdditionalFee" />
-                    <ValidationMessage For="@(() => invoice.AdditionalFee)" />
-                </div>
-
-                <div class="form-group">
-                    <label for="Status">Trạng Thái</label>
-                    <select id="Status" class="form-control" @bind="invoice.Status">
-                        <option value="1">Đã Thanh Toán</option>
-                        <option value="0">Chưa Thanh Toán</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="Notes">Ghi Chú</label>
-                    <textarea id="Notes" class="form-control" @bind="invoice.Notes"></textarea>
-                </div>
-
-                <div class="form-group">
-                    <button type="submit" class="btn btn-primary">Cập Nhật</button>
-                </div>
-            </EditForm>
-        </div>
-    </div>
-
+<div class="row">  
     <!-- Danh Sách Hóa Đơn -->
-    <div class="col-md-9">
+    <div class="col-md-12">
         <div class="card">
             <div class="card-header">
                 <strong>Danh Sách Hóa Đơn</strong>
@@ -83,7 +31,7 @@
                         @if (invoices == null || !invoices.Any())
                         {
                             <tr>
-                                <td colspan="9" class="text-center">Đang tải dữ liệu...</td>
+                                <td colspan="12" class="text-center">Đang tải dữ liệu...</td>
                             </tr>
                         }
                         else
@@ -101,7 +49,7 @@
                                     <td>@item?.TotalAmount</td>                                
                                     <td>@item.AdditionalFee</td>                               
                                     <td>@item.Notes</td>
-                                    <td>@item.Status</td>
+                                    <td>@GetStatusName(item.Status)</td>
                                     <td>
                                         <button class="btn btn-warning" @onclick="() => SelectInvoice(item.IdInvoice)">Chi Tiết</button>
                                     </td>
@@ -155,7 +103,7 @@
                                         <td>@field?.FieldName</td> 
                                         <td>@field?.Location</td>
                                         <td>@shift?.ShiftName @shift?.StartTime - @shift?.EndTime</td>
-                                        <td>@detail.Status</td>
+                                        <td>@GetStatusName(detail.Status)</td>
                                     </tr>
                                 }
                             }
@@ -193,6 +141,16 @@
         FieldShifts = await services.GetAllFieldShiftAsync();
         Fields = await services.GetAllShiftAsync();
         Shifts = await services.GetFieldByTypeAsync();
+    }
+
+    private string GetStatusName(int status)
+    {
+        return status switch
+        {
+            3 => "WaitingForCheckin",
+            4 => "Renting",
+            _ => "Unknown"
+        };
     }
 
     private void SelectInvoice(Guid id)

@@ -104,6 +104,7 @@ namespace AppAPI
             builder.Services.AddScoped<IRepository<FieldShift>, Repository<FieldShift>>();
             builder.Services.AddScoped<IRepository<Invoice>, Repository<Invoice>>();
             builder.Services.AddScoped<IRepository<InvoiceDetail>, Repository<InvoiceDetail>>();
+            builder.Services.AddScoped<IRepository<Notification>, Repository<Notification>>();
 
 			var app = builder.Build();
 

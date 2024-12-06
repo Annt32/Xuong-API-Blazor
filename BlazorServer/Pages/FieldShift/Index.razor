@@ -6,12 +6,15 @@
 @using BlazorServer.Models
 @using AppData.Enum
 
+
+@inject IInvoiceServices InvoiceService
+@inject IInvoiceDetailService InvoiceDetailService
 @inject IFieldService FieldService
 @inject IShiftService ShiftService
 @inject IFieldShiftService FieldshiftService
+@inject INotificationService NotificationService
 @inject IServices<WebUser> UserService
 @inject IJSRuntime JS
-<h3>Quản Lý Ca Sân Bóng</h3>
 
 <style>
     button[disabled] {
@@ -23,6 +26,172 @@
     }
 
 </style>
+
+@if (isEditModal)
+{
+    <div class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sửa Ca Sân</h5>
+                    <button type="button" class="btn-close" @onclick="CloseModal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="@editFieldShift" OnValidSubmit="UpdateFieldShift">
+                        <DataAnnotationsValidator />
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert @((errorMessage.Contains("thành công") ? "alert-success" : "alert-danger"))" role="alert">
+                                @errorMessage
+                            </div>
+                        }
+
+                        <div class="form-group">
+                            <label for="EditField">Chọn Sân</label>
+                            <select id="EditField" class="form-control" @bind="editFieldShift.IdField">
+                                <option value="">-- Chọn Sân --</option>
+                                @foreach (var field in fieldShifts)
+                                {
+                                    <option value="@field.IdField">@field.FieldName</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="EditShift">Chọn Ca</label>
+                            <select id="EditShift" class="form-control" @bind="editFieldShift.IdShift">
+                                <option value="">-- Chọn Ca --</option>
+                                @foreach (var shift in shifts)
+                                {
+                                    <option value="@shift.IdShift">@shift.ShiftName @shift.StartTime-@shift.EndTime</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="EditDate">Chọn Ngày</label>
+                            <input type="date" id="EditDate" class="form-control" @bind="editFieldShift.Time" />
+                            <ValidationMessage For="@(() => editFieldShift.Time)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="EditCustomerPhone">Số điện thoại khách hàng</label>
+                            <div class="input-group">
+                                <input type="text" id="EditCustomerPhone" class="form-control" @bind="editCustomerPhoneNumber" placeholder="Nhập số điện thoại" />
+                                <div class="input-group-append">
+                                    <button type="button" class="btn btn-success ml-2" @onclick="CheckEditCustomer">Kiểm tra</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        @if (editSelectedCustomer != null)
+                        {
+                            <div class="mt-3">
+                                <p><strong>Khách hàng:</strong> @editSelectedCustomer.FullName</p>
+                                <p><strong>Số điện thoại:</strong> @editSelectedCustomer.PhoneNumber</p>
+                            </div>
+                        }
+
+                        <div class="form-group mt-3">
+                            <button type="submit" class="btn btn-primary">Cập Nhật</button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="card">
+    <div class="card-header">
+        <strong>Danh Sách Thông Báo</strong>
+    </div>
+    <div class="card-body">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Nội Dung</th>
+                    <th>Sân</th>
+                    <th>Ca</th>
+                    <th>Thời gian</th>
+                    <th>Thời gian tạo</th>
+                    <th>Thao Tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (notifications == null || !notifications.Any(n => !n.IsViewed))
+                {
+                    <tr>
+                        <td colspan="7" class="text-center">Không có thông báo nào.</td>
+                    </tr>
+                }
+                else
+                {
+                    int index = 0;
+                    @foreach (var notification in notifications.Where(n => !n.IsViewed))
+                    {
+                        <tr>
+                            <td>@(++index)</td>
+                            <td>@notification.Message</td>
+                            <td>@notification.FieldName</td> <!-- Hiển thị tên sân -->
+                            <td>@notification.ShiftName</td> <!-- Hiển thị tên ca -->
+                            <td>@notification.StartTime - @notification.EndTime</td> <!-- Hiển thị thời gian -->
+                            <td>@notification.CreatedAt</td>
+                            @if (!notification.IsViewed)
+                            {
+                                <td>
+                                    <button class="btn btn-primary" @onclick="() => MarkAsViewed(notification.IdNotification)">
+                                        Đánh Dấu Đã Xem
+                                    </button>
+                                </td>
+                            }
+                        </tr>
+                    }
+                }
+            </tbody>
+
+        </table>
+    </div>
+</div>
+
+
+<div class="modal fade" id="checkInModal" tabindex="-1" aria-labelledby="checkInModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="checkInModalLabel">Xác Nhận CheckIn</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn CheckIn sân bóng này?</p>
+                <p><strong>Mã Ca Sân:</strong> @selectedFieldShift?.IdFieldShift</p>
+                <p><strong>Người Đặt:</strong> @selectedFieldShift?.CustomerFullName</p>
+                <p><strong>Thời Gian:</strong> @selectedFieldShift?.Time.ToString("dd/MM/yyyy HH:mm")</p>
+                <p><strong>Tổng Tiền:</strong> @string.Format("{0:C}", invoice?.TotalAmount ?? 0)</p>
+                <p><strong>Đặt Cọc:</strong> @string.Format("{0:C}", depositAmount)</p>
+
+                <div class="form-group">
+                    <label for="receivedAmount">Số Tiền Khách Trả:</label>
+                    <input type="number" id="receivedAmount" class="form-control" @bind="receivedAmount" placeholder="Nhập số tiền khách trả" />
+                </div>
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <p class="text-danger mt-2">@errorMessage</p>
+                }
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-success" @onclick="ValidateAndConfirmCheckIn">
+                    Xác Nhận CheckIn
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <div class="row">
     <!-- Thông Tin Sân Bóng -->
@@ -145,7 +314,7 @@
                         else
                         {
                             int index = 0;
-                            @foreach (var item in fieldShiftViewModels)
+                            @foreach (var item in fieldShiftViewModels.Where(fs => fs.Status != FieldShiftStatus.Delete))
                             {
                                 <tr>
                                     <td>@(++index)</td>
@@ -159,7 +328,7 @@
                                 
                                     <td>@item.Status</td>
                                     <td>
-                                        <button class="btn btn-info" @onclick="() => EditField(item.IdFieldShift)">
+                                        <button class="btn btn-info" @onclick="() => OpenEditModal(item.IdFieldShift)">
                                             <i class="fas fa-edit"></i> Sửa
                                         </button>
                                         <button class="btn btn-danger" @onclick="() => ConfirmDelete(item.IdFieldShift)">
@@ -167,9 +336,14 @@
                                         </button>
 
                                         <!-- Nút CheckIn chỉ hiện khi Status == 1 -->
-                                        <button class="btn btn-success" @onclick="() => ConfirmCheckIn(item.IdFieldShift)" hidden="@(item.Status != FieldShiftStatus.WaitingForCheckin)">
+                                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#checkInModal"
+                                                @onclick="() => PrepareCheckInModal(item.IdFieldShift)"
+                                                hidden="@(item.Status != (FieldShiftStatus)3)">
                                             CheckIn
                                         </button>
+
+
+ 
                                     </td>
                                 </tr>
                             }
@@ -196,12 +370,27 @@
 
     private string errorMessage = string.Empty;
 
+    private Invoice invoice;
+    private List<InvoiceDetail> invoiceDetails = new List<InvoiceDetail>();
+    private FieldShiftViewModel selectedFieldShift;
+
+    private decimal depositAmount = 0; // Số tiền đặt cọc
+    private decimal receivedAmount = 0; // Số tiền khách trả
+    private bool isPaymentValid = true; // Kiểm tra thanh toán
+
+    private bool isEditModal = false;
+    private FieldShiftViewModel editFieldShift = new FieldShiftViewModel();
+    private WebUser editSelectedCustomer = null;
+    private string editCustomerPhoneNumber = string.Empty;
+    private List<NotificationViewModel> notifications = new List<NotificationViewModel>();
+
     protected override async Task OnInitializedAsync()
     {
         var allFieldshifts = await FieldshiftService.GetAllFieldshiftAsync();
         customers = await UserService.GetAllFieldsAsync();
         fieldShifts = await FieldService.GetAllFieldsAsync();
         shifts = await ShiftService.GetAllShiftsAsync();
+        await LoadNotifications();
 
         // Thực hiện load dữ liệu ban đầu
         fieldShiftViewModels = (await Task.WhenAll(allFieldshifts.Select(async f =>
@@ -228,6 +417,247 @@
                 };
         }))).ToList();
     }
+
+    private async Task LoadNotifications()
+    {
+        // Gọi API
+        notifications = await NotificationService.GetAllNotificationsAsync();
+
+        // Log kết quả
+        Console.WriteLine("Số lượng thông báo: " + notifications.Count);
+        foreach (var notification in notifications)
+        {
+            Console.WriteLine($"ID: {notification.IdNotification}, Message: {notification.Message}");
+        }
+    }
+
+
+    private async Task MarkAsViewed(Guid idNotification)
+    {
+        // Gọi API hoặc dịch vụ để đánh dấu thông báo là "đã xem"
+        var result = await NotificationService.MarkAsViewedAsync(idNotification);
+        if (result)
+        {
+            // Làm mới danh sách thông báo
+            await LoadNotifications();
+        }
+    }
+
+    private void OpenEditModal(Guid idFieldShift)
+    {
+        // Lấy thông tin ca sân cần sửa
+        var fieldShift = fieldShiftViewModels.FirstOrDefault(f => f.IdFieldShift == idFieldShift);
+        if (fieldShift != null)
+        {
+            isEditModal = true;
+            editFieldShift = new FieldShiftViewModel
+            {
+                IdFieldShift = fieldShift.IdFieldShift,
+                IdField = fieldShift.IdField,
+                IdShift = fieldShift.IdShift,
+                Time = fieldShift.Time,
+                Status = fieldShift.Status,
+                CreatedAt = fieldShift.CreatedAt,
+                UpdatedAt = DateTime.Now,
+                CreatedBy = fieldShift.CreatedBy,
+                UpdatedBy = "User"
+            };
+            editCustomerPhoneNumber = fieldShift.CustomerPhoneNumber; // Số điện thoại khách hàng
+            editSelectedCustomer = customers.FirstOrDefault(c => c.PhoneNumber == editCustomerPhoneNumber);
+        }
+    }
+
+    private void CloseModal()
+    {
+        isEditModal = false;
+        editFieldShift = new FieldShiftViewModel();
+        editSelectedCustomer = null;
+        editCustomerPhoneNumber = string.Empty;
+    }
+
+    private async Task UpdateFieldShift()
+    {
+        try
+        {
+            var result = await FieldshiftService.UpdateFieldshiftAsync(editFieldShift.IdFieldShift, new FieldShiftDTO
+                {
+                    IdFieldShift = editFieldShift.IdFieldShift,
+                    IdField = editFieldShift.IdField,
+                    IdShift = editFieldShift.IdShift,
+                    Time = editFieldShift.Time,
+                    Status = editFieldShift.Status,
+                    CreatedAt = editFieldShift.CreatedAt,
+                    UpdatedAt = DateTime.Now,
+                    CreatedBy = "ba9cff05-7ead-445e-0c2e-08dcf90f16c9",
+                    UpdatedBy = "User"
+                });
+
+            if (result)
+            {
+                errorMessage = "Cập nhật thành công!";
+                await OnInitializedAsync(); // Làm mới danh sách
+            }
+            else
+            {
+                errorMessage = "Không thể cập nhật ca sân.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Có lỗi xảy ra: {ex.Message}";
+        }
+
+        CloseModal(); // Đóng modal sau khi cập nhật
+    }
+
+    private void CheckEditCustomer()
+{
+    editSelectedCustomer = customers.FirstOrDefault(c => c.PhoneNumber == editCustomerPhoneNumber);
+
+    if (editSelectedCustomer == null)
+    {
+        errorMessage = "Không tìm thấy khách hàng với số điện thoại này.";
+    }
+    else
+    {
+        errorMessage = string.Empty;
+        editFieldShift.CreatedBy = editSelectedCustomer.Id.ToString();
+    }
+}
+
+
+    private async Task PrepareCheckInModal(Guid idFieldShift)
+    {
+        // Tìm ca sân theo Id
+        selectedFieldShift = fieldShiftViewModels.FirstOrDefault(f => f.IdFieldShift == idFieldShift);
+
+        // Load thông tin hóa đơn và tiền cọc
+        await LoadInvoiceDetails(idFieldShift);
+    }
+
+
+    private void ShowCheckInModal(Guid idFieldShift)
+    {
+        selectedFieldShift = fieldShiftViewModels.FirstOrDefault(f => f.IdFieldShift == idFieldShift);
+
+        if (selectedFieldShift != null)
+        {
+            // Hiển thị modal bằng cách gọi Bootstrap API
+            JS.InvokeVoidAsync("eval", "new bootstrap.Modal(document.getElementById('checkInModal')).show()");
+        }
+    }
+
+
+    private async Task ConfirmCheckInModal()
+    {
+        if (selectedFieldShift != null)
+        {
+            // Thực hiện cập nhật trạng thái giống như nút CheckIn ban đầu
+            selectedFieldShift.Status = FieldShiftStatus.Renting;
+
+            await FieldshiftService.UpdateFieldshiftAsync(selectedFieldShift.IdFieldShift, new FieldShiftDTO
+            {
+                IdFieldShift = selectedFieldShift.IdFieldShift,
+                IdShift = selectedFieldShift.IdShift,
+                Status = FieldShiftStatus.Renting,
+                CreatedAt = selectedFieldShift.CreatedAt,
+                UpdatedAt = DateTime.Now,
+                    CreatedBy = "ba9cff05-7ead-445e-0c2e-08dcf90f16c9",
+                UpdatedBy = "User"
+            });
+
+            // Đóng modal
+            JS.InvokeVoidAsync("$('#checkInModal').modal", "hide");
+
+            // Cập nhật danh sách hiển thị
+            await OnInitializedAsync();
+        }
+    }
+
+    private async Task LoadInvoiceDetails(Guid idFieldShift)
+    {
+        // Lấy thông tin hóa đơn và chi tiết hóa đơn từ dịch vụ
+        var invoiceDetail = await InvoiceDetailService.GetAllInvoiceDetailAsync();
+        var invoiceDetailsForShift = invoiceDetail.FirstOrDefault(d => d.IdFieldShift == idFieldShift);
+
+        if (invoiceDetailsForShift != null)
+        {
+            invoice = await InvoiceService.GetinvoiceByIdAsync(invoiceDetailsForShift.IdInvoice);
+
+            // Tính số tiền đặt cọc
+            depositAmount = invoiceDetailsForShift.Deposit;
+        }
+    }
+
+    private async Task ValidateAndConfirmCheckIn()
+    {
+        decimal totalToPay;
+
+        // Tính số tiền cần thanh toán dựa trên tiền cọc
+        if (depositAmount > 0)
+        {
+            totalToPay = (invoice?.TotalAmount ?? 0) - depositAmount;
+        }
+        else
+        {
+            totalToPay = invoice?.TotalAmount ?? 0;
+        }
+
+        // Kiểm tra số tiền khách trả
+        if (receivedAmount != totalToPay)
+        {
+            isPaymentValid = false;
+            errorMessage = $"Số tiền khách trả phải chính xác là {string.Format("{0:C}", totalToPay)}.";
+            return;
+        }
+
+        isPaymentValid = true;
+        errorMessage = string.Empty;
+
+        // Cập nhật trạng thái `FieldShift` thành Renting (Status = 4)
+        if (selectedFieldShift != null)
+        {
+            selectedFieldShift.Status = FieldShiftStatus.Renting; // Status = 4
+            await FieldshiftService.UpdateFieldshiftAsync(selectedFieldShift.IdFieldShift, new FieldShiftDTO
+                {
+                    IdFieldShift = selectedFieldShift.IdFieldShift,
+                    IdShift = selectedFieldShift.IdShift,
+                    IdField = selectedFieldShift.IdField,
+                    Status = FieldShiftStatus.Renting, // Cập nhật trạng thái
+                    CreatedAt = selectedFieldShift.CreatedAt,
+                    UpdatedAt = DateTime.Now,
+                    CreatedBy = selectedFieldShift.CreatedBy,
+                    UpdatedBy = "User"
+                });
+        }
+
+        // Cập nhật trạng thái `Invoice` thành Paid (Status = 4)
+        if (invoice != null)
+        {
+            invoice.Status = 4; // Status = 4 (Paid)
+            await InvoiceService.UpdateUserInvoice(invoice.IdInvoice, invoice);
+        }
+
+        // Cập nhật trạng thái tất cả `InvoiceDetails` liên quan thành Paid (Status = 4)
+        if (invoice != null)
+        {
+            var invoiceDetailsToUpdate = await InvoiceDetailService.GetAllInvoiceDetailAsync();
+            var relatedInvoiceDetails = invoiceDetailsToUpdate.Where(d => d.IdInvoice == invoice.IdInvoice).ToList();
+
+            foreach (var detail in relatedInvoiceDetails)
+            {
+                detail.Status = 4; // Status = 4 (Paid)
+                await InvoiceDetailService.UpdateInvoiceDetail(detail.IdInvoiceDetail, detail);
+            }
+        }
+
+        // Đóng modal
+        JS.InvokeVoidAsync("$('#checkInModal').modal", "hide");
+
+        // Làm mới dữ liệu
+        await OnInitializedAsync();
+    }
+
 
 
     private async Task CheckCustomer()

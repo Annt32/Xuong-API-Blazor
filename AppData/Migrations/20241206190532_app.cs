@@ -266,6 +266,7 @@ namespace AppData.Migrations
                     UserId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
                     AdditionalFee = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    TotalAmount = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     Notes = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
@@ -429,6 +430,30 @@ namespace AppData.Migrations
                         column: x => x.IdInvoice,
                         principalTable: "Invoices",
                         principalColumn: "IdInvoice",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
+                {
+                    IdNotification = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    IdFieldShift = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Message = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    IsViewed = table.Column<bool>(type: "bit", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UpdatedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    CreatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    UpdatedBy = table.Column<string>(type: "nvarchar(max)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.IdNotification);
+                    table.ForeignKey(
+                        name: "FK_Notifications_FieldShifts_IdFieldShift",
+                        column: x => x.IdFieldShift,
+                        principalTable: "FieldShifts",
+                        principalColumn: "IdFieldShift",
                         onDelete: ReferentialAction.Cascade);
                 });
 
@@ -610,6 +635,11 @@ namespace AppData.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Notifications_IdFieldShift",
+                table: "Notifications",
+                column: "IdFieldShift");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Parameters_ParameterTypeId",
                 table: "Parameters",
                 column: "ParameterTypeId");
@@ -653,6 +683,9 @@ namespace AppData.Migrations
 
             migrationBuilder.DropTable(
                 name: "DrinkDetails");
+
+            migrationBuilder.DropTable(
+                name: "Notifications");
 
             migrationBuilder.DropTable(
                 name: "Parameters");

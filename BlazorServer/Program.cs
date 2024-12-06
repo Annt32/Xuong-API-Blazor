@@ -43,6 +43,8 @@ namespace BlazorServer
             builder.Services.AddScoped<IInvoiceServices, InvoiceService>();
             builder.Services.AddScoped<IInvoiceDetailService, InvoiceDetailService>();
 
+            builder.Services.AddScoped<INotificationService, NotificationService>();
+
 
             builder.Services.AddBlazoredSessionStorage();
             builder.Services.AddScoped<IShiftService, ShiftService>();

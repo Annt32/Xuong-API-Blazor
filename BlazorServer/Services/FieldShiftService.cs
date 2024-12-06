@@ -49,14 +49,16 @@ namespace BlazorServer.Services
 
 		// Xóa FieldShift theo ID
 		public async Task<bool> DeleteFieldshiftAsync(Guid id)
-        {
-            string requestURL = $"https://localhost:7143/api/Fieldshift/fieldshift-delete/{id}";
-            var response = await _httpClient.DeleteAsync(requestURL);
-            return response.IsSuccessStatusCode;
-        }
+		{
+			string requestURL = $"https://localhost:7143/api/Fieldshift/fieldshift-delete/{id}";
 
-        // Lấy tất cả FieldShifts (sử dụng DTO)
-        public async Task<List<FieldShiftDTO>> GetAllFieldshiftAsync()
+			var response = await _httpClient.DeleteAsync(requestURL);
+			return response.IsSuccessStatusCode;
+		}
+
+
+		// Lấy tất cả FieldShifts (sử dụng DTO)
+		public async Task<List<FieldShiftDTO>> GetAllFieldshiftAsync()
         {
             string requestURL = "https://localhost:7143/api/FieldShift/fieldshift-get";
             var response = await _httpClient.GetStringAsync(requestURL);

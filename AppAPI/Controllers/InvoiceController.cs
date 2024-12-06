@@ -46,6 +46,7 @@ namespace AppAPI.Controllers
                 }
 
                 entity.Notes = invoiceDTO.Notes;
+                entity.Status = invoiceDTO.Status;
                 _respoitory.ModifileUpdate(entity);
                 return Ok("Update success");
             }
@@ -62,7 +63,6 @@ namespace AppAPI.Controllers
 			try
 			{
 				var invoice = _mapper.Map<Invoice>(invoiceDTO);
-				invoice.IdInvoice = Guid.NewGuid();
 				invoice.CreatedAt = DateTime.Now;
 				invoice.UpdatedAt = DateTime.Now;
 

@@ -18,5 +18,6 @@ namespace AppData.DTO.Field_DTO
 		public DateTime UpdatedAt { get; set; }
 		public string? CreatedBy { get; set; }
 		public string? UpdatedBy { get; set; }
+		public Guid IdFieldType { get; set; }
 	}
 }

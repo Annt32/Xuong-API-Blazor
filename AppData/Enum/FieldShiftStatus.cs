@@ -12,6 +12,8 @@ namespace AppData.Enum
 		WaitForPayment = 1,
 		WaitForConfirmation = 2,
 		WaitingForCheckin = 3,
-	    Renting = 4
+	    Renting = 4,
+		Cancel = 5,
+		Delete = 6
 	}
 }

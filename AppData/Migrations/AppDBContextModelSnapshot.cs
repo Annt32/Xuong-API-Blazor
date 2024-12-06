@@ -165,11 +165,6 @@ namespace AppData.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
                     b.Property<string>("FieldName")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -212,39 +207,6 @@ namespace AppData.Migrations
 
                     b.Property<Guid>("IdField")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("IdFieldShift")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("UpdatedBy")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("IdFieldDetail");
-
-                    b.HasIndex("IdField");
-
-                    b.HasIndex("IdFieldShift");
-
-                    b.ToTable("FieldDetails");
-                });
-
-            modelBuilder.Entity("AppData.Entities.FieldShift", b =>
-                {
-                    b.Property<Guid>("IdFieldShift")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid>("IdShift")
                         .HasColumnType("uniqueidentifier");
@@ -320,21 +282,15 @@ namespace AppData.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Email")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("Notes")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PhoneNumber")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<int>("Status")
                         .HasColumnType("int");
+
+                    b.Property<decimal>("TotalAmount")
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -389,6 +345,42 @@ namespace AppData.Migrations
                     b.HasIndex("IdInvoice");
 
                     b.ToTable("InvoiceDetails");
+                });
+
+            modelBuilder.Entity("AppData.Entities.Notification", b =>
+                {
+                    b.Property<Guid>("IdNotification")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("IdFieldShift")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsViewed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UpdatedBy")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("IdNotification");
+
+                    b.HasIndex("IdFieldShift");
+
+                    b.ToTable("Notifications");
                 });
 
             modelBuilder.Entity("AppData.Entities.Parameter", b =>
@@ -914,19 +906,6 @@ namespace AppData.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("AppData.Entities.FieldShift", "FieldShift")
-                        .WithMany()
-                        .HasForeignKey("IdFieldShift")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Field");
-
-                    b.Navigation("FieldShift");
-                });
-
-            modelBuilder.Entity("AppData.Entities.FieldShift", b =>
-                {
                     b.HasOne("AppData.Entities.Shift", "Shift")
                         .WithMany("FieldShifts")
                         .HasForeignKey("IdShift")
@@ -966,6 +945,17 @@ namespace AppData.Migrations
                     b.Navigation("FieldShift");
 
                     b.Navigation("Invoice");
+                });
+
+            modelBuilder.Entity("AppData.Entities.Notification", b =>
+                {
+                    b.HasOne("AppData.Entities.FieldShift", "FieldShift")
+                        .WithMany()
+                        .HasForeignKey("IdFieldShift")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FieldShift");
                 });
 
             modelBuilder.Entity("AppData.Entities.Parameter", b =>
@@ -1104,11 +1094,6 @@ namespace AppData.Migrations
                 });
 
             modelBuilder.Entity("AppData.Entities.Shift", b =>
-                {
-                    b.Navigation("Attendances");
-                });
-
-            modelBuilder.Entity("AppData.Entities.User", b =>
                 {
                     b.Navigation("Attendances");
 

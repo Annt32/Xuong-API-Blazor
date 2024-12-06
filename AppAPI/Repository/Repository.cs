@@ -74,6 +74,28 @@ namespace AppAPI.Repositories
         }
         public async Task ModifileUpdate(T value) { _context.Entry(value).State = EntityState.Modified; _context.SaveChanges(); }
 
-        
+		public IQueryable<T> GetAllWithIncludes(params Expression<Func<T, object>>[] includes)
+		{
+			IQueryable<T> query = _entities;
+			foreach (var include in includes)
+			{
+				query = query.Include(include);
+			}
+			return query.AsNoTracking();
+		}
+
+        public IEnumerable<Notification> GetNotificationsWithDetails()
+        {
+            if (typeof(T) == typeof(Notification))
+            {
+                return _context.Set<Notification>()
+                    .Include(n => n.FieldShift)                // Bao gồm FieldShift
+                    .ThenInclude(fs => fs.Field)              // Bao gồm Field trong FieldShift
+                    .Include(n => n.FieldShift.Shift)         // Bao gồm Shift trong FieldShift
+                    .ToList() as IEnumerable<Notification>;
+            }
+            throw new InvalidOperationException("This method is only for Notification entity.");
+        }
+
     }
 }

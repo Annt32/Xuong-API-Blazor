@@ -38,10 +38,12 @@ namespace AppData.AppDbContext
         public DbSet<ParameterType> ParameterTypes { get; set; }
         public DbSet<FieldShift> FieldShifts { get; set; }
         public DbSet<FieldType> FieldTypes { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            base.OnConfiguring(optionsBuilder);
+            //base.OnConfiguring(optionsBuilder);
+            optionsBuilder.UseSqlServer("Data Source=DESKTOP-PMB8531\\SQLEXPRESS;Initial Catalog=XuongTH6;Integrated Security=True;Trust Server Certificate=True");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -59,7 +61,16 @@ namespace AppData.AppDbContext
 				.HasOne(fs => fs.Shift)
 				.WithMany(s => s.FieldShifts)
 				.HasForeignKey(fs => fs.IdShift);
-			base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Notification>()
+            .HasKey(n => n.IdNotification);
+
+            modelBuilder.Entity<Notification>()
+                .HasOne(n => n.FieldShift)
+                .WithMany()
+                .HasForeignKey(n => n.IdFieldShift)
+                .OnDelete(DeleteBehavior.Cascade);
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

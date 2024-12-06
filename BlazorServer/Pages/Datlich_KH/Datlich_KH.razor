@@ -1,5 +1,6 @@
 ﻿@page "/dat-lich"
 @using System.Globalization
+@using AppData.Enum
 @using AppData.DTO
 @using AppData.DTO.FieldType_DTO
 @using AppData.DTO.Field_DTO
@@ -8,191 +9,6 @@
 @inject IFieldShiftService _svFS;
 @inject IInvoiceServices _invoiceService;
 @inject IInvoiceDetailService _invoiceDetailService;
-
-<div>
-	<header>
-	</header>
-	<div class="col-12">
-		<div class="row">
-			<!-- Lịch bé trong col-2 -->
-			<div class="col-2">
-				<div class="col-12">
-					<h6 align="center">Chọn ngày</h6>
-					<hr />
-					<div class="calendar-container">
-						<div class="row nav-buttons">
-							<button class="btn col-1" @onclick="PreviousMonth">&lt;</button>
-							<h5 class="col-9 text-center">@monthAndYear</h5>
-							<button class="btn col-1" @onclick="NextMonth">&gt;</button>
-						</div>
-						<table class="table table-bordered">
-							<thead>
-								<tr>
-									<th>Sun</th>
-									<th>Mon</th>
-									<th>Tue</th>
-									<th>Wed</th>
-									<th>Thu</th>
-									<th>Fri</th>
-									<th>Sat</th>
-								</tr>
-							</thead>
-							<tbody>
-								@foreach (var week in smallCalendar)
-								{
-									<tr>
-										@foreach (var day in week)
-										{
-											<td class="@GetClassForDate(day)" @onclick="() => SelectDate(day)">
-												@day.Day
-											</td>
-										}
-									</tr>
-								}
-							</tbody>
-						</table>
-					</div>
-				</div>
-			</div>
-
-			<!-- Lịch lớn trong col-7 -->
-			<div class="col-7">
-				<h6 align="center">Đặt lịch</h6>
-				<hr />
-				<div class="calendar-large">
-					<table class="table table-bordered">
-						<thead>
-							<tr>
-								<th>Sun</th>
-								<th>Mon</th>
-								<th>Tue</th>
-								<th>Wed</th>
-								<th>Thu</th>
-								<th>Fri</th>
-								<th>Sat</th>
-							</tr>
-						</thead>
-						<tbody>
-							@foreach (var week in largeCalendar)
-							{
-								<tr>
-									@foreach (var day in week)
-									{
-										<td class="@GetClassForDate(day)">
-											@day.Day
-										</td>
-									}
-								</tr>
-							}
-
-						</tbody>
-					</table>
-				</div>
-			</div>
-
-			<!-- Danh sách sự kiện trong col-3 -->
-			<div class="col-3">
-				<h6 align="center">Sự kiện</h6>
-				<hr />
-				<div class="mt-2">
-					<table class="table table-sukien">
-						<thead>
-							<tr>
-								<th>Thông tin ca</th>
-								<th>Thao tác</th>
-							</tr>
-						</thead>
-						<tbody>
-							<!-- Sự kiện sẽ được thêm ở đây -->
-						</tbody>
-					</table>
-				</div>
-			</div>
-		</div>
-	</div>
-</div>
-
-<!--Modal-->
-@if (isActiveModal == 1)
-{
-	<div class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
-		<div class="modal-dialog" role="document">
-			<div class="modal-content">
-				<div class="modal-header">
-					<div class="col-12">
-						<div class="row">
-							<div class="col-1">
-								<button type="button" class="btn" @onclick="CloseModal" aria-label="Close">
-									<span aria-hidden="true">&times;</span>
-								</button>
-							</div>
-							<div class="col-5">
-								<h6>Thông tin sân</h6>
-							</div>
-						</div>
-
-					</div>
-				</div>
-				<div class="modal-body">
-					<EditForm Model="@input" OnValidSubmit="async () => await CreateFieldShift()">
-						<DataAnnotationsValidator />
-						<div class="mb-3">
-							<label for="" class="form-label">Loại sân</label>
-							<InputSelect @bind-Value="IdFT" class="form-control" TValue="Guid">
-								<option selected value="@Guid.Empty">--Chọn loại sân--</option>
-								@foreach (var item in _lstFT)
-								{
-									<option value="@item.Id">@item.Name</option>
-								}
-							</InputSelect>
-
-						</div>
-						<div class="mb-3">
-							<label for="" class="form-label">Sân số</label>
-							<InputSelect @bind-Value="input.IdField" class="form-select">
-								<option selected value="@Guid.Empty">--Chọn sân--</option>
-								@foreach (var item in _lstF)
-								{
-									<option value="@item.IdField">@item.FieldName</option>
-								}
-							</InputSelect>
-						</div>
-
-						<div class="mb-3">
-							<label for="" class="form-label">Ca</label>
-							<InputSelect @bind-Value="input.IdShift" class="form-control">
-								<option selected value="@Guid.Empty">--Chọn ca--</option>
-								@foreach (var item in _lstS)
-								{
-									<option value="@item.IdShift">@item.ShiftName</option>
-								}
-							</InputSelect>
-						</div>
-						<div class="mb-3">
-							<label for="" class="form-label">Ngày</label>
-							<InputDate @bind-Value="selectedDate" class="form-control" readonly />
-						</div>
-						<div class="mb-3">
-							<label for="" class="form-label">Giá</label>
-							<InputText @bind-Value="linhtinh" class="form-control" readonly />
-						</div>
-						@if (messageString == "Đặt lịch thành công")
-						{
-							<p class="alert alert-success">@messageString</p>
-						}
-						else if (messageString == "Đặt lịch thất bại")
-						{
-							<p class="alert alert-danger">@messageString</p>
-						}
-
-						<button type="submit" class="btn btn-primary">Đặt</button>
-					</EditForm>
-				</div>
-			</div>
-		</div>
-	</div>
-}
-<!--EndModal-->
 
 <style>
 	/* Tùy chỉnh các ô lịch */
@@ -247,13 +63,13 @@
 		border-radius: 10px;
 	}
 
-		.calendar-container th {
-			font-size: 9px;
-		}
+	.calendar-container th {
+		font-size: 9px;
+	}
 
-		.calendar-container td {
-			font-size: 10px;
-		}
+	.calendar-container td {
+		font-size: 10px;
+	}
 
 	/* Header */
 	h6 {
@@ -293,28 +109,247 @@
 	}
 </style>
 
+<div>
+	<header>
+	</header>
+	<div class="col-12">
+		<div class="row">
+			<!-- Lịch bé trong col-2 -->
+			<div class="col-2">
+				<div class="col-12">
+					<h6 align="center">Chọn ngày</h6>
+					<hr />
+					<div class="calendar-container">
+						<div class="row nav-buttons">
+							<button class="btn col-1" @onclick="PreviousMonth">&lt;</button>
+							<h5 class="col-9 text-center">@monthAndYear</h5>
+							<button class="btn col-1" @onclick="NextMonth">&gt;</button>
+						</div>
+						<table class="table table-bordered">
+							<thead>
+								<tr>
+									<th>Sun</th>
+									<th>Mon</th>
+									<th>Tue</th>
+									<th>Wed</th>
+									<th>Thu</th>
+									<th>Fri</th>
+									<th>Sat</th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (var week in smallCalendar)
+								{
+									<tr>
+										@foreach (var day in week)
+										{
+											<td class="@GetClassForDate(day)" @onclick="() => SelectDate(day)">
+												@day.Day
+											</td>
+										}
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			<!-- Lịch lớn trong col-7 -->
+			<div class="col-6">
+				<h6 align="center">Đặt lịch</h6>
+				<hr />
+				<div class="calendar-large">
+					<table class="table table-bordered">
+						<thead>
+							<tr>
+								<th>Sun</th>
+								<th>Mon</th>
+								<th>Tue</th>
+								<th>Wed</th>
+								<th>Thu</th>
+								<th>Fri</th>
+								<th>Sat</th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach (var week in largeCalendar)
+							{
+								<tr>
+									@foreach (var day in week)
+									{
+										<td class="@GetClassForDate(day)">
+											@day.Day
+										</td>
+									}
+								</tr>
+							}
+
+						</tbody>
+					</table>
+				</div>
+			</div>
+
+			<!-- Danh sách sự kiện trong col-3 -->
+			<div class="col-4">
+				<h6 align="center">Sự kiện</h6>
+				<hr />
+				<div class="mt-2">
+					<table class="table table-sukien">
+						<thead>
+							<tr>
+								<th>Tên sân</th>
+								<th>Ca</th>
+								<th>Ngày</th>
+								<th>Trạng thái</th>
+								<th>Thao tác</th>
+							</tr>
+						</thead>
+						<tbody>
+							@foreach (var fieldShift in _lstFS.Where(fs => fs.CreatedBy == "ba9cff05-7ead-445e-0c2e-08dcf90f16c9" && fs.Status != FieldShiftStatus.Delete))
+							{
+								<tr>
+									<td>@fieldShift.FieldName</td>
+									<td>@fieldShift.ShiftName (@fieldShift.StartTime?.ToString(@"hh\:mm") - @fieldShift.EndTime?.ToString(@"hh\:mm"))</td>
+									<td>@fieldShift.Time.ToString("dd/MM/yyyy")</td>
+									<td>@fieldShift.Status</td>
+									<td>
+										<button type="button" class="btn btn-danger" @onclick="() => DeleteOrCancelFieldShift(fieldShift.IdFieldShift, fieldShift.Status)">Hủy</button>
+										<button type="button" class="btn btn-warning" @onclick="() => PostponeFieldShift(fieldShift.IdFieldShift)">Hoãn</button>
+										<button type="button" class="btn btn-danger" @onclick="() => DeleteOrCancelFieldShift(fieldShift.IdFieldShift, fieldShift.Status)">Xóa</button>
+										<button type="button" class="btn btn-primary" @onclick="() => OpenEditModal(fieldShift)">Sửa</button>
+
+									</td>
+								</tr>
+							}
+							@if (!_lstFS.Any(fs => fs.CreatedBy == "ba9cff05-7ead-445e-0c2e-08dcf90f16c9" && fs.Status != FieldShiftStatus.Delete))
+							{
+								<tr>
+									<td colspan="5" class="text-center">Không có lịch đặt</td>
+								</tr>
+							}
+						</tbody>
+
+					</table>
+				</div>
+			</div>
+
+		</div>
+	</div>
+</div>
+
+<!--Modal-->
+@if (isActiveModal == 1 || isEditModal == 1)
+{
+	<div class="modal fade show" tabindex="-1" role="dialog" style="display: block;">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<div class="col-12">
+						<div class="row">
+							<div class="col-1">
+								<button type="button" class="btn" @onclick="CloseModal" aria-label="Close">
+									<span aria-hidden="true">&times;</span>
+								</button>
+							</div>
+							<div class="col-5">
+								<h6>@(isEditModal == 1 ? "Sửa thông tin" : "Thông tin sân")</h6>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-body">
+					<EditForm Model="@input" OnValidSubmit="() => (isEditModal == 1 ? UpdateFieldShift() : CreateFieldShift())">
+						<DataAnnotationsValidator />
+
+						<div class="mb-3">
+							<label for="" class="form-label">Loại sân</label>
+							<InputSelect Value="IdFT" ValueChanged="UpdateFieldTypePrice" ValueExpression="@(() => IdFT)" class="form-control" TValue="Guid">
+								<option value="@Guid.Empty">--Chọn loại sân--</option>
+								@foreach (var item in _lstFT)
+								{
+									<option value="@item.Id">@item.Name</option>
+								}
+							</InputSelect>
+						</div>
+
+						<div class="mb-3">
+							<label for="" class="form-label">Sân số</label>
+							<InputSelect @bind-Value="input.IdField" class="form-select">
+								<option selected value="@Guid.Empty">--Chọn sân--</option>
+								@foreach (var item in _lstF)
+								{
+									<option value="@item.IdField">@item.FieldName</option>
+								}
+							</InputSelect>
+						</div>
+
+						<div class="mb-3">
+							<label for="" class="form-label">Ca</label>
+							<InputSelect @bind-Value="input.IdShift" class="form-control">
+								<option selected value="@Guid.Empty">--Chọn ca--</option>
+								@foreach (var item in _lstS)
+								{
+									<option value="@item.IdShift">@item.ShiftName</option>
+								}
+							</InputSelect>
+						</div>
+
+						<div class="mb-3">
+							<label for="" class="form-label">Ngày</label>
+							<InputDate @bind-Value="selectedDate" class="form-control" readonly />
+						</div>
+
+						<div class="mb-3">
+							<label for="" class="form-label">Giá</label>
+							<InputText @bind-Value="priceDisplayString" class="form-control" readonly />
+						</div>
+
+						<div class="mb-3">
+							<label for="" class="form-label">Tiền đặt cọc</label>
+							<span class="form-control bg-light">@((depositAmount.HasValue ? depositAmount.Value.ToString("C0") : "Chưa có dữ liệu"))</span>
+						</div>
+
+						@if (messageString == "Đặt lịch thành công")
+						{
+							<p class="alert alert-success">@messageString</p>
+						}
+						else if (messageString == "Đặt lịch thất bại")
+						{
+							<p class="alert alert-danger">@messageString</p>
+						}
+
+						<button type="submit" class="btn btn-primary">@((isEditModal == 1) ? "Cập nhật" : "Đặt")</button>
+					</EditForm>
+				</div>
+			</div>
+		</div>
+	</div>
+}
+
+<!--EndModal-->
+
+
+
 @code {
 	private string linhtinh = "Tạm thời chưa tính";
 	private int isActiveModal = 0;
 	private DateTime currentMonth = DateTime.Now;
 	private string monthAndYear => currentMonth.ToString("MMMM yyyy", CultureInfo.InvariantCulture);
 	private DateTime selectedDate = DateTime.Now;
+
 	// Lịch bé và lớn
 	private List<List<DateTime>> smallCalendar = new List<List<DateTime>>();
 	private List<List<DateTime>> largeCalendar = new List<List<DateTime>>();
-
-	//
 	private List<FieldShiftDTO> _lstFS = new List<FieldShiftDTO>();
 	private FieldShiftDTO input = new FieldShiftDTO();
-	private string messageString = "";
-
-	//
 	private List<FieldTypeDTO> _lstFT = new List<FieldTypeDTO>();
-
-	//
 	private List<Shift> _lstS = new List<Shift>();
 
-
+	private string messageString = "";
+	private decimal? priceDisplay = null;
+	private decimal? depositAmount = null; // Tiền đặt cọc
+	private int isEditModal = 0;
 
 	private Guid _idFT;
 	public Guid IdFT
@@ -343,9 +378,196 @@
 		await LoadShift();
 		await LoadField();
 
-		Console.WriteLine($"Số lượng loại sân trong _lstFT: {_lstFT.Count}");
+		await LoadFieldShift();
+		Console.WriteLine("Danh sách FieldShift:");
+		foreach (var item in _lstFS)
+		{
+			Console.WriteLine($"Id: {item.IdFieldShift}, CreatedBy: {item.CreatedBy}");
+		}
 
 	}
+
+	private string priceDisplayString
+	{
+		get => priceDisplay.HasValue ? priceDisplay.Value.ToString("C0") : "Chưa chọn loại sân";
+		set
+		{
+			if (decimal.TryParse(value, out var result))
+			{
+				priceDisplay = result;
+			}
+			else
+			{
+				priceDisplay = null;
+			}
+		}
+	}
+
+	private void OpenEditModal(FieldShiftDTO fieldShift)
+	{
+		isEditModal = 1; // Kích hoạt trạng thái sửa
+		input = new FieldShiftDTO
+		{
+			IdFieldShift = fieldShift.IdFieldShift,
+			IdField = fieldShift.IdField,
+			IdShift = fieldShift.IdShift,
+			Time = fieldShift.Time,
+			Status = fieldShift.Status,
+			CreatedBy = fieldShift.CreatedBy,
+			UpdatedBy = "system",
+			CreatedAt = fieldShift.CreatedAt,
+			UpdatedAt = DateTime.Now
+		};
+		StateHasChanged();
+	}
+
+
+
+	private async Task PostponeFieldShift(Guid fieldShiftId)
+	{
+		try
+		{
+			// Tìm FieldShift cần hoãn
+			var fieldShift = _lstFS.FirstOrDefault(fs => fs.IdFieldShift == fieldShiftId);
+			if (fieldShift != null)
+			{
+				// Cập nhật trạng thái
+				fieldShift.Status = AppData.Enum.FieldShiftStatus.Cancel;
+				fieldShift.UpdatedBy = "system";
+				fieldShift.UpdatedAt = DateTime.Now;
+
+				// Gọi dịch vụ cập nhật
+				bool result = await _svFS.UpdateFieldshiftAsync(fieldShiftId, fieldShift);
+				if (result)
+				{
+					messageString = "Hoãn thành công!";
+					await LoadFieldShift(); // Tải lại danh sách sau khi cập nhật
+				}
+				else
+				{
+					messageString = "Hoãn thất bại!";
+				}
+			}
+			else
+			{
+				messageString = "Không tìm thấy FieldShift!";
+			}
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error in PostponeFieldShift: {ex.Message}");
+			messageString = "Có lỗi xảy ra khi hoãn!";
+		}
+
+		StateHasChanged(); // Cập nhật lại giao diện
+	}
+
+	private async Task UpdateFieldShift()
+	{
+		try
+		{
+			var result = await _svFS.UpdateFieldshiftAsync(input.IdFieldShift, input);
+			if (result)
+			{
+				messageString = "Cập nhật thành công!";
+				await LoadFieldShift(); // Tải lại danh sách
+			}
+			else
+			{
+				messageString = "Cập nhật thất bại!";
+			}
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error in UpdateFieldShift: {ex.Message}");
+			messageString = "Có lỗi xảy ra khi cập nhật!";
+		}
+
+		CloseModal(); // Đóng modal
+		StateHasChanged();
+	}
+
+
+
+	private async Task DeleteOrCancelFieldShift(Guid fieldShiftId, FieldShiftStatus status)
+	{
+		try
+		{
+			if (status == FieldShiftStatus.Renting)
+			{
+				// Nếu đang "Renting", cập nhật thành "Cancel"
+				var fieldShift = _lstFS.FirstOrDefault(fs => fs.IdFieldShift == fieldShiftId);
+				if (fieldShift != null)
+				{
+					fieldShift.Status = FieldShiftStatus.Cancel;
+					fieldShift.UpdatedBy = "system";
+					fieldShift.UpdatedAt = DateTime.Now;
+
+					// Gọi dịch vụ cập nhật
+					bool result = await _svFS.UpdateFieldshiftAsync(fieldShiftId, fieldShift);
+					messageString = result ? "Đã chuyển trạng thái thành 'Cancel'" : "Không thể cập nhật trạng thái!";
+				}
+				else
+				{
+					messageString = "Không tìm thấy FieldShift để cập nhật!";
+				}
+			}
+			else if (status == FieldShiftStatus.WaitingForCheckin)
+			{
+				// Nếu đang "WaitingForCheckin", xóa bản ghi
+				bool result = await _svFS.DeleteFieldshiftAsync(fieldShiftId);
+				messageString = result ? "Đã xóa bản ghi thành công!" : "Không thể xóa bản ghi!";
+			}
+			else
+			{
+				messageString = "Trạng thái không hợp lệ để xóa!";
+			}
+
+			// Tải lại danh sách sau khi cập nhật/xóa
+			await LoadFieldShift();
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error in DeleteOrCancelFieldShift: {ex.Message}");
+			messageString = "Có lỗi xảy ra trong quá trình xử lý!";
+		}
+
+		StateHasChanged(); // Cập nhật lại giao diện
+	}
+
+
+	private async Task UpdateFieldTypePrice(Guid selectedId)
+	{
+		try
+		{
+			// Cập nhật giá trị được chọn
+			IdFT = selectedId;
+
+			// Tìm loại sân trong danh sách
+			var selectedFieldType = _lstFT.FirstOrDefault(ft => ft.Id == IdFT);
+
+			if (selectedFieldType != null)
+			{
+				priceDisplay = selectedFieldType.Price; // Cập nhật giá tiền
+				depositAmount = selectedFieldType.Price / 2; // Tính tiền đặt cọc (50%)
+				Console.WriteLine($"Selected field type: {selectedFieldType.Name}, Price: {selectedFieldType.Price}, Deposit: {depositAmount}");
+			}
+			else
+			{
+				priceDisplay = null; // Nếu không tìm thấy, đặt giá trị null
+				depositAmount = null;
+				Console.WriteLine("No field type found for selected ID.");
+			}
+
+			StateHasChanged(); // Cập nhật giao diện
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error in UpdateFieldTypePrice: {ex.Message}");
+		}
+	}
+
+
 
 	//Open modal 1
 	private void OpenModal()
@@ -357,6 +579,8 @@
 	private void CloseModal()
 	{
 		isActiveModal = 0;
+		isEditModal = 0;
+		input = new FieldShiftDTO(); // Reset dữ liệu
 	}
 
 	//Load FieldType
@@ -364,8 +588,12 @@
 	{
 		var result = await _svFS.GetAllFieldTypeAsync();
 
-		_lstFT = result.OrderBy(x => x.Name).ToList();
+		if (result != null)
+		{
+			_lstFT = result.OrderBy(x => x.Name).ToList();
+		}
 	}
+
 
 	//Load Field
 	private async Task LoadField()
@@ -396,8 +624,14 @@
 	//Load FieldShift
 	private async Task LoadFieldShift()
 	{
-		_lstFS = await _svFS.GetAllFieldshiftAsync();
+		var result = await _svFS.GetAllFieldshiftAsync();
+
+		if (result != null)
+		{
+			_lstFS = result.ToList();
+		}
 	}
+
 
 
 	//lich
@@ -457,9 +691,7 @@
 		input.CreatedBy = "ba9cff05-7ead-445e-0c2e-08dcf90f16c9";
 		input.UpdatedBy = "system";
 
-		// Tạo FieldShift và lấy đối tượng FieldShift trả về
 		var createdFieldShift = await _svFS.CreateFieldshiftAsync(input);
-
 		if (createdFieldShift != null && createdFieldShift.IdFieldShift != Guid.Empty)
 		{
 			// Tìm hoặc tạo Invoice cho ngày này
@@ -467,7 +699,6 @@
 
 			if (invoice != null)
 			{
-				// Tạo InvoiceDetail cho FieldShift vừa tạo
 				bool checkInvoiceDetail = await CreateInvoiceDetail(invoice.IdInvoice, createdFieldShift.IdFieldShift);
 
 				if (checkInvoiceDetail)
@@ -496,52 +727,86 @@
 	// Hàm kiểm tra hoặc tạo mới Invoice
 	private async Task<Invoice> GetOrCreateInvoice(DateTime date)
 	{
-		// Tìm Invoice theo ngày
-		var invoices = await _invoiceService.GetAllInvoiceAsync();
-		var existingInvoice = invoices.FirstOrDefault(inv => inv.CreatedAt.Date == date.Date);
-
-		if (existingInvoice != null)
+		try
 		{
-			return existingInvoice;
+			// Tìm Invoice theo ngày
+			var invoices = await _invoiceService.GetAllInvoiceAsync();
+			var existingInvoice = invoices.FirstOrDefault(inv => inv.CreatedAt.Date == date.Date);
+
+			if (existingInvoice != null)
+			{
+				return existingInvoice;
+			}
+			else
+			{
+				// Tạo Invoice mới
+				Invoice newInvoice = new Invoice
+					{
+						IdInvoice = Guid.NewGuid(),
+						UserId = Guid.Parse("ba9cff05-7ead-445e-0c2e-08dcf90f16c9"), // Giả sử UserId có trong FieldShift hoặc set từ trước
+						Status = 1,
+						AdditionalFee = depositAmount ?? 0, // Tổng tiền cọc
+						TotalAmount = priceDisplay ?? 0,   // Tổng số tiền
+						CreatedAt = date,
+						UpdatedAt = date,
+						CreatedBy = input.CreatedBy,
+						UpdatedBy = "system",
+						Notes = "Hóa đơn đặt lịch"
+					};
+
+				bool checkInvoice = await _invoiceService.CreateInvoiceAsync(newInvoice);
+				return checkInvoice ? newInvoice : null;
+			}
 		}
-		else
+		catch (Exception ex)
 		{
-			// Tạo Invoice mới
-			Invoice newInvoice = new Invoice
-				{
-					IdInvoice = Guid.NewGuid(),
-					UserId = Guid.Parse("ba9cff05-7ead-445e-0c2e-08dcf90f16c9"), // Giả sử UserId có trong FieldShift hoặc set từ trước
-					Status = 1,
-					AdditionalFee = 0, // Phí bổ sung, điều chỉnh nếu cần
-					TotalAmount = 0, // Tổng số tiền, điều chỉnh nếu cần
-					CreatedAt = date,
-					UpdatedAt = date,
-					CreatedBy = input.CreatedBy,
-					UpdatedBy = "system",
-					Notes = "Hóa đơn đặt lịch"
-				};
-
-			bool checkInvoice = await _invoiceService.CreateInvoiceAsync(newInvoice);
-			return checkInvoice ? newInvoice : null;
+			Console.WriteLine($"Error in GetOrCreateInvoice: {ex.Message}");
+			return null;
 		}
 	}
+
 
 	// Hàm tạo mới InvoiceDetail
 	private async Task<bool> CreateInvoiceDetail(Guid invoiceId, Guid fieldShiftId)
 	{
-		InvoiceDetail newInvoiceDetail = new InvoiceDetail
-			{
-				IdInvoiceDetail = Guid.NewGuid(),
-				IdInvoice = invoiceId,
-				IdFieldShift = fieldShiftId,
-				Deposit = 100000, 
-				Status = 1, 
-				CreatedAt = DateTime.Now,
-				UpdatedAt = DateTime.Now,
-				CreatedBy = input.CreatedBy
-			};
+		try
+		{
+			InvoiceDetail newInvoiceDetail = new InvoiceDetail
+				{
+					IdInvoiceDetail = Guid.NewGuid(),
+					IdInvoice = invoiceId,
+					IdFieldShift = fieldShiftId,
+					Deposit = depositAmount ?? 0, // Tiền đặt cọc
+					Status = 1,
+					CreatedAt = DateTime.Now,
+					UpdatedAt = DateTime.Now,
+					CreatedBy = input.CreatedBy
+				};
 
-		return await _invoiceDetailService.CreateInvoiceDetailAsync(newInvoiceDetail);
+			return await _invoiceDetailService.CreateInvoiceDetailAsync(newInvoiceDetail);
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error in CreateInvoiceDetail: {ex.Message}");
+			return false;
+		}
+	}
+
+	private async Task DeleteFieldShift(Guid fieldShiftId)
+	{
+		// // Gọi dịch vụ để xóa FieldShift
+		// bool result = await _svFS.DeleteFieldShiftAsync(fieldShiftId);
+		// if (result)
+		// {
+		// 	// Tải lại danh sách sau khi xóa
+		// 	await LoadFieldShift();
+		// 	messageString = "Xóa thành công!";
+		// }
+		// else
+		// {
+		// 	messageString = "Xóa thất bại!";
+		// }
+		// StateHasChanged();
 	}
 
 }

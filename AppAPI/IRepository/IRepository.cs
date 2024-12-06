@@ -1,4 +1,5 @@
-﻿using System;
+﻿using AppData.Entities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -18,5 +19,8 @@ namespace AppAPI.Repositories
         void RemoveRange(IEnumerable<T> entities); // Xóa nhiều đối tượng
 
         Task ModifileUpdate(T value);
+		IQueryable<T> GetAllWithIncludes(params Expression<Func<T, object>>[] includeProperties);
+        IEnumerable<Notification> GetNotificationsWithDetails();
+
     }
 }
